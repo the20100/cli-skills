@@ -30,6 +30,48 @@ meta-ads-cli update
 
 Authentication is handled automatically via the shared `meta-auth` config. If no token is found, instruct the user to run `meta-auth login`. Do NOT manage auth from this tool — use the `meta-auth` skill instead.
 
+## Environment variables
+
+**Access Token** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `META_TOKEN` | Primary (canonical) |
+| `META_ACCESS_TOKEN` | Explicit access token form |
+| `META_API_TOKEN` | API token form |
+| `META_BEARER_TOKEN` | Bearer token form |
+| `TOKEN_META` | Reversed |
+| `META_KEY` | Key shorthand |
+| `META_API_KEY` | API key form |
+| `META_API` | Short form |
+| `API_KEY_META` | Reversed API key |
+| `API_META` | Short reversed |
+
+**App Secret (optional)** — the following env var names are accepted:
+
+| Variable | Notes |
+|----------|-------|
+| `META_APP_SECRET` | Primary (canonical) |
+| `META_SECRET` | Short form |
+| `META_SECRET_KEY` | Secret key form |
+| `META_API_SECRET` | API secret form |
+| `META_APP_SECRET_KEY` | Full form |
+| `SECRET_META` | Reversed |
+| `API_SECRET_META` | Secret with API prefix |
+| `SK_META` | Secret key shorthand (prefix) |
+| `META_SK` | Secret key shorthand (suffix) |
+
+**Ad Account** — the following env var names are accepted:
+
+| Variable | Notes |
+|----------|-------|
+| `META_ADS_ACCOUNT` | Primary (canonical) |
+| `META_ACCOUNT` | Short form |
+| `META_AD_ACCOUNT` | Alternative form |
+| `FACEBOOK_AD_ACCOUNT` | Facebook naming |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

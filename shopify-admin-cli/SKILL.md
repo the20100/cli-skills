@@ -39,6 +39,41 @@ Get your access token from Shopify Admin → Settings → Apps and sales channel
 
 ---
 
+## Environment variables
+
+**Access Token** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `SHOPIFY_ACCESS_TOKEN` | Primary (canonical) |
+| `SHOPIFY_TOKEN` | Short form |
+| `SHOPIFY_API_TOKEN` | API token form |
+| `SHOPIFY_API_KEY` | API key form |
+| `SHOPIFY_KEY` | Short key form |
+| `SHOPIFY_API` | Short form |
+| `API_KEY_SHOPIFY` | Reversed API key |
+| `API_SHOPIFY` | Short reversed |
+| `SHOPIFY_SECRET_KEY` | Secret key form |
+| `SHOPIFY_API_SECRET` | API secret form |
+| `SHOPIFY_SECRET` | Short secret |
+| `SHOPIFY_SK` | Secret key shorthand (suffix) |
+| `SK_SHOPIFY` | Secret key shorthand (prefix) |
+
+**Shop Domain** — the following env var names are accepted:
+
+| Variable | Notes |
+|----------|-------|
+| `SHOPIFY_SHOP` | Primary (canonical) |
+| `SHOPIFY_STORE` | Store naming |
+| `SHOPIFY_DOMAIN` | Domain naming |
+| `SHOPIFY_SHOP_URL` | URL form |
+| `SHOPIFY_STORE_URL` | Store URL form |
+| `SHOP_DOMAIN` | Short form |
+
+Both token AND shop must be set for env var resolution to work.
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

@@ -39,6 +39,30 @@ Get your API key at: https://app.instantly.ai/app/settings/integrations
 
 ---
 
+## Environment variables
+
+The following env var names are accepted for the API key (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `INSTANTLY_API_KEY` | Primary (canonical) |
+| `INSTANTLY_KEY` | Short form |
+| `INSTANTLY_API` | Without "_KEY" suffix |
+| `API_KEY_INSTANTLY` | Reversed prefix |
+| `API_INSTANTLY` | Short reversed |
+| `INSTANTLY_PK` | Public key shorthand |
+| `INSTANTLY_PUBLIC` | Public key long form |
+| `INSTANTLY_API_SECRET` | If saved as a secret |
+| `INSTANTLY_SECRET_KEY` | Secret key form |
+| `INSTANTLY_API_SECRET_KEY` | Full secret key form |
+| `INSTANTLY_SECRET` | Short secret |
+| `SECRET_INSTANTLY` | Reversed secret |
+| `API_SECRET_INSTANTLY` | Secret with API prefix |
+| `SK_INSTANTLY` | Secret key shorthand (prefix) |
+| `INSTANTLY_SK` | Secret key shorthand (suffix) |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

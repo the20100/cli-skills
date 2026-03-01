@@ -28,6 +28,30 @@ perplexity-cli update
 
 The API key is read from the `PERPLEXITY_API_KEY` environment variable, or passed via `--api-key`.
 
+## Environment variables
+
+The following env var names are accepted for the API key (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `PERPLEXITY_API_KEY` | Primary (canonical) |
+| `PERPLEXITY_KEY` | Short form |
+| `PERPLEXITY_API` | Without "_KEY" suffix |
+| `API_KEY_PERPLEXITY` | Reversed prefix |
+| `API_PERPLEXITY` | Short reversed |
+| `PERPLEXITY_PK` | Public key shorthand |
+| `PERPLEXITY_PUBLIC` | Public key long form |
+| `PERPLEXITY_API_SECRET` | If saved as a secret |
+| `PERPLEXITY_SECRET_KEY` | Secret key form |
+| `PERPLEXITY_API_SECRET_KEY` | Full secret key form |
+| `PERPLEXITY_SECRET` | Short secret |
+| `SECRET_PERPLEXITY` | Reversed secret |
+| `API_SECRET_PERPLEXITY` | Secret with API prefix |
+| `SK_PERPLEXITY` | Secret key shorthand (prefix) |
+| `PERPLEXITY_SK` | Secret key shorthand (suffix) |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

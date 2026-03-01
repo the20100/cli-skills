@@ -44,6 +44,37 @@ Credentials are stored in:
 
 ---
 
+## Environment variables
+
+**API Key (read-only access)** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `YOUTUBE_API_KEY` | Primary (canonical) |
+| `YOUTUBE_KEY` | Short form |
+| `YOUTUBE_API` | Without "_KEY" suffix |
+| `YOUTUBE_DATA_API_KEY` | Full data API form |
+| `GOOGLE_API_KEY_YOUTUBE` | Google-prefixed form |
+| `API_KEY_YOUTUBE` | Reversed prefix |
+| `YOUTUBE_PK` | Public key shorthand |
+| `YOUTUBE_PUBLIC` | Public key long form |
+
+**OAuth Token (required for write operations)** — the following env var names are accepted:
+
+| Variable | Notes |
+|----------|-------|
+| `YOUTUBE_OAUTH_TOKEN` | Primary (canonical) |
+| `YOUTUBE_ACCESS_TOKEN` | Access token form |
+| `YOUTUBE_TOKEN` | Short form |
+| `YOUTUBE_BEARER_TOKEN` | Bearer token form |
+| `YOUTUBE_SECRET` | Secret form |
+| `YOUTUBE_SK` | Secret key shorthand (suffix) |
+| `YOUTUBE_API_SECRET` | API secret form |
+
+OAuth token takes priority over API key when both are set.
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

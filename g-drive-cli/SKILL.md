@@ -43,6 +43,36 @@ Create OAuth credentials at: https://console.cloud.google.com/apis/credentials (
 
 ---
 
+## Environment variables
+
+**Access Token** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `GDRIVE_ACCESS_TOKEN` | Primary (canonical) |
+| `GDRIVE_TOKEN` | Short form |
+| `GOOGLE_DRIVE_TOKEN` | Google-prefixed form |
+| `GDRIVE_BEARER_TOKEN` | Bearer token form |
+| `GOOGLE_DRIVE_ACCESS_TOKEN` | Full Google form |
+| `GDRIVE_ACCESS` | Minimal form |
+| `TOKEN_GDRIVE` | Reversed |
+
+**OAuth Client credentials (for `gdrive auth login`):**
+
+| Variable | Notes |
+|----------|-------|
+| `GDRIVE_CLIENT_ID` | Primary (canonical) |
+| `GOOGLE_CLIENT_ID` | Standard Google name |
+| `GDRIVE_OAUTH_CLIENT_ID` | OAuth-specific form |
+
+| Variable | Notes |
+|----------|-------|
+| `GDRIVE_CLIENT_SECRET` | Primary (canonical) |
+| `GOOGLE_CLIENT_SECRET` | Standard Google name |
+| `GDRIVE_OAUTH_SECRET` | OAuth-specific form |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

@@ -47,6 +47,25 @@ Shared auth config (meta-auth):
 
 ---
 
+## Environment variables
+
+**Access Token** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `META_TOKEN` | Primary (canonical) |
+| `META_ACCESS_TOKEN` | Explicit access token form |
+| `META_API_TOKEN` | API token form |
+| `META_BEARER_TOKEN` | Bearer token form |
+| `TOKEN_META` | Reversed |
+| `META_KEY` | Key shorthand |
+| `META_API_KEY` | API key form |
+| `META_API` | Short form |
+| `API_KEY_META` | Reversed API key |
+| `API_META` | Short reversed |
+
+---
+
 ## Global flags
 
 | Flag | Description |

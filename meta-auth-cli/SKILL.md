@@ -35,6 +35,45 @@ meta-auth-cli update
 
 ---
 
+## Environment variables
+
+**Access Token** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `META_TOKEN` | Primary (canonical) |
+| `META_ACCESS_TOKEN` | Explicit access token form |
+| `META_API_TOKEN` | API token form |
+| `META_BEARER_TOKEN` | Bearer token form |
+| `TOKEN_META` | Reversed |
+| `META_KEY` | Key shorthand |
+| `META_API_KEY` | API key form |
+
+**App ID** — the following env var names are accepted:
+
+| Variable | Notes |
+|----------|-------|
+| `META_APP_ID` | Primary (canonical) |
+| `META_APPLICATION_ID` | Full form |
+| `META_CLIENT_ID` | OAuth client ID form |
+| `FACEBOOK_APP_ID` | Facebook naming |
+| `META_ID` | Short form |
+
+**App Secret** — the following env var names are accepted:
+
+| Variable | Notes |
+|----------|-------|
+| `META_APP_SECRET` | Primary (canonical) |
+| `META_SECRET` | Short form |
+| `META_SECRET_KEY` | Secret key form |
+| `META_API_SECRET` | API secret form |
+| `META_APP_SECRET_KEY` | Full form |
+| `SECRET_META` | Reversed |
+| `SK_META` | Secret key shorthand (prefix) |
+| `META_SK` | Secret key shorthand (suffix) |
+
+---
+
 ## Token resolution order (all Meta CLIs)
 
 1. `META_TOKEN` env var

@@ -53,6 +53,19 @@ Credentials are stored in:
 
 ---
 
+## Environment variables
+
+Google Ads CLI authenticates via OAuth2 stored in `~/.config/gads/credentials.json`. There are no direct API key environment variables — authentication must be done via `gads-cli auth login`.
+
+The following Google OAuth env vars are checked during auth setup:
+
+| Variable | Notes |
+|----------|-------|
+| `GOOGLE_CLIENT_ID` | OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | OAuth client secret |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

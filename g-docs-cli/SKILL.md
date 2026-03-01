@@ -56,6 +56,36 @@ Get OAuth credentials from: https://console.cloud.google.com/ (enable Google Doc
 
 ---
 
+## Environment variables
+
+**Access Token** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `GDOCS_ACCESS_TOKEN` | Primary (canonical) |
+| `GDOCS_TOKEN` | Short form |
+| `GOOGLE_DOCS_TOKEN` | Google-prefixed form |
+| `GDOCS_BEARER_TOKEN` | Bearer token form |
+| `GOOGLE_DOCS_ACCESS_TOKEN` | Full Google form |
+| `GDOCS_ACCESS` | Minimal form |
+| `TOKEN_GDOCS` | Reversed |
+
+**OAuth Client credentials (for `gdocs auth login`):**
+
+| Variable | Notes |
+|----------|-------|
+| `GDOCS_CLIENT_ID` | Primary (canonical) |
+| `GOOGLE_CLIENT_ID` | Standard Google name |
+| `GDOCS_OAUTH_CLIENT_ID` | OAuth-specific form |
+
+| Variable | Notes |
+|----------|-------|
+| `GDOCS_CLIENT_SECRET` | Primary (canonical) |
+| `GOOGLE_CLIENT_SECRET` | Standard Google name |
+| `GDOCS_OAUTH_SECRET` | OAuth-specific form |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

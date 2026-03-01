@@ -53,6 +53,23 @@ To create a service account: https://console.cloud.google.com/iam-admin/servicea
 
 ---
 
+## Environment variables
+
+**Service Account Credentials file path** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `GOOGLE_APPLICATION_CREDENTIALS` | Primary (canonical, standard Google) |
+| `GSHEETS_CREDENTIALS` | Sheets-specific form |
+| `GOOGLE_CREDENTIALS` | Short Google form |
+| `GCP_APPLICATION_CREDENTIALS` | GCP-prefixed form |
+| `GCP_CREDENTIALS` | Short GCP form |
+| `GOOGLE_SERVICE_ACCOUNT_FILE` | Explicit service account form |
+| `GSHEETS_SA_FILE` | Sheets service account form |
+| `GCLOUD_CREDENTIALS` | gcloud tool naming |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

@@ -30,6 +30,30 @@ exa update
 
 Set the API key via the `EXA_API_KEY` environment variable (preferred) or pass `--api-key <key>` to every command.
 
+## Environment variables
+
+The following env var names are accepted for the API key (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `EXA_API_KEY` | Primary (canonical) |
+| `EXA_KEY` | Short form |
+| `EXA_API` | Without "_KEY" suffix |
+| `API_KEY_EXA` | Reversed prefix |
+| `API_EXA` | Short reversed |
+| `EXA_PK` | Public key shorthand |
+| `EXA_PUBLIC` | Public key long form |
+| `EXA_API_SECRET` | If saved as a secret |
+| `EXA_SECRET_KEY` | Secret key form |
+| `EXA_API_SECRET_KEY` | Full secret key form |
+| `EXA_SECRET` | Short secret |
+| `SECRET_EXA` | Reversed secret |
+| `API_SECRET_EXA` | Secret with API prefix |
+| `SK_EXA` | Secret key shorthand (prefix) |
+| `EXA_SK` | Secret key shorthand (suffix) |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

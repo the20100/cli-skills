@@ -40,6 +40,30 @@ Get your API key at: https://fal.ai/dashboard/keys
 
 ---
 
+## Environment variables
+
+The following env var names are accepted for the API key (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `FAL_KEY` | Primary (canonical) |
+| `FAL_API_KEY` | With "_API_KEY" suffix |
+| `FAL_API` | Without "_KEY" suffix |
+| `API_KEY_FAL` | Reversed prefix |
+| `API_FAL` | Short reversed |
+| `FAL_PK` | Public key shorthand |
+| `FAL_PUBLIC` | Public key long form |
+| `FAL_API_SECRET` | If saved as a secret |
+| `FAL_SECRET_KEY` | Secret key form |
+| `FAL_API_SECRET_KEY` | Full secret key form |
+| `FAL_SECRET` | Short secret |
+| `SECRET_FAL` | Reversed secret |
+| `API_SECRET_FAL` | Secret with API prefix |
+| `SK_FAL` | Secret key shorthand (prefix) |
+| `FAL_SK` | Secret key shorthand (suffix) |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

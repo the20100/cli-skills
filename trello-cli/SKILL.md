@@ -39,6 +39,39 @@ Generate a token at: `https://trello.com/1/authorize?expiration=never&scope=read
 
 ---
 
+## Environment variables
+
+**API Key** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `TRELLO_API_KEY` | Primary (canonical) |
+| `TRELLO_KEY` | Short form |
+| `TRELLO_API` | Without "_KEY" suffix |
+| `API_KEY_TRELLO` | Reversed prefix |
+| `API_TRELLO` | Short reversed |
+| `TRELLO_PK` | Public key shorthand |
+| `TRELLO_PUBLIC` | Public key long form |
+
+**API Token (secret)** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `TRELLO_API_TOKEN` | Primary (canonical) |
+| `TRELLO_TOKEN` | Short form |
+| `TRELLO_API_SECRET` | Secret form |
+| `TRELLO_SECRET_KEY` | Secret key form |
+| `TRELLO_API_SECRET_KEY` | Full secret key form |
+| `TRELLO_SECRET` | Short secret |
+| `SECRET_TRELLO` | Reversed secret |
+| `API_SECRET_TRELLO` | Secret with API prefix |
+| `SK_TRELLO` | Secret key shorthand (prefix) |
+| `TRELLO_SK` | Secret key shorthand (suffix) |
+
+Both key AND token must be set via env vars for env var resolution to work. If only one is set, the config file is used instead.
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

@@ -53,6 +53,41 @@ Get credentials at: https://console.cloud.google.com/apis/credentials
 
 ---
 
+## Environment variables
+
+**Service Account Credentials file path** — the following env var names are accepted (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `GOOGLE_APPLICATION_CREDENTIALS` | Primary (canonical, standard Google) |
+| `GOOGLE_CREDENTIALS` | Short Google form |
+| `GCP_APPLICATION_CREDENTIALS` | GCP-prefixed form |
+| `GCP_CREDENTIALS` | Short GCP form |
+| `GOOGLE_SERVICE_ACCOUNT_FILE` | Explicit service account form |
+| `GCLOUD_CREDENTIALS` | gcloud tool naming |
+
+**OAuth Client ID (for OAuth2 auth method):**
+
+| Variable | Notes |
+|----------|-------|
+| `GOOGLE_CLIENT_ID` | Primary (canonical) |
+| `GOOGLE_OAUTH_CLIENT_ID` | OAuth-specific form |
+| `GCP_CLIENT_ID` | GCP-prefixed form |
+| `GCLOUD_CLIENT_ID` | gcloud tool naming |
+| `GOOGLE_CLIENT` | Short form |
+
+**OAuth Client Secret:**
+
+| Variable | Notes |
+|----------|-------|
+| `GOOGLE_CLIENT_SECRET` | Primary (canonical) |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | OAuth-specific form |
+| `GCP_CLIENT_SECRET` | GCP-prefixed form |
+| `GCLOUD_CLIENT_SECRET` | gcloud tool naming |
+| `GOOGLE_SECRET` | Short form |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |

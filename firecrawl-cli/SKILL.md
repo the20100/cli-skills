@@ -30,6 +30,30 @@ The API key is read from the `FIRECRAWL_API_KEY` environment variable, or passed
 
 For self-hosted instances, set `FIRECRAWL_API_URL` or use `--api-url`.
 
+## Environment variables
+
+The following env var names are accepted for the API key (first non-empty wins):
+
+| Variable | Notes |
+|----------|-------|
+| `FIRECRAWL_API_KEY` | Primary (canonical) |
+| `FIRECRAWL_KEY` | Short form |
+| `FIRECRAWL_API` | Without "_KEY" suffix |
+| `API_KEY_FIRECRAWL` | Reversed prefix |
+| `API_FIRECRAWL` | Short reversed |
+| `FIRECRAWL_PK` | Public key shorthand |
+| `FIRECRAWL_PUBLIC` | Public key long form |
+| `FIRECRAWL_API_SECRET` | If saved as a secret |
+| `FIRECRAWL_SECRET_KEY` | Secret key form |
+| `FIRECRAWL_API_SECRET_KEY` | Full secret key form |
+| `FIRECRAWL_SECRET` | Short secret |
+| `SECRET_FIRECRAWL` | Reversed secret |
+| `API_SECRET_FIRECRAWL` | Secret with API prefix |
+| `SK_FIRECRAWL` | Secret key shorthand (prefix) |
+| `FIRECRAWL_SK` | Secret key shorthand (suffix) |
+
+---
+
 ## Global flags (apply to every command)
 
 | Flag | Description |
