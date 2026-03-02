@@ -335,6 +335,7 @@ All insights commands support these flags:
 - `--days N` — look back N days (default 30, ignored when --period is set)
 - `--start YYYY-MM-DD` — start date (overrides --days, ignored when --period is set)
 - `--end YYYY-MM-DD` — end date (overrides --days, ignored when --period is set)
+- `--all` — include rows with 0 impressions (by default only rows with at least 1 impression are shown)
 
 **`--period` presets:**
 
