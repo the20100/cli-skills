@@ -6,7 +6,7 @@ description: Use when the user wants to manage Google Ads campaigns, ad groups, 
 
 # Google Ads CLI
 
-The `gads-cli` CLI manages Google Ads accounts, campaigns, ad groups, keywords, ads, and performance insights via the Google Ads REST API v19.
+The `gads-cli` CLI manages Google Ads accounts, campaigns, ad groups, keywords, ads, and performance insights via the Google Ads REST API v23.
 
 Run commands with the Bash tool. Find the binary by running `which gads-cli` or look in the standard PATH. The binary name is `gads-cli`.
 
@@ -386,4 +386,4 @@ Additional flag: `--campaign` *(required)*
 - **Update**: run `gads-cli update` to pull the latest version from GitHub.
 - **Output is auto-detected**: JSON when piped, tables in terminal. Use `--json` when parsing output.
 - **Finding IDs**: use `gads-cli campaigns list --account=ID --json | jq '.[].Campaign.id'`
-- **API version**: Uses Google Ads REST API v19.
+- **API version**: Uses Google Ads REST API v23.
