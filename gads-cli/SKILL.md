@@ -331,9 +331,28 @@ Flags:
 
 All insights commands support these flags:
 - `--account` *(required)* — customer account ID
-- `--days N` — look back N days (default 30)
-- `--start YYYY-MM-DD` — start date (overrides --days)
-- `--end YYYY-MM-DD` — end date (overrides --days)
+- `--period` — preset period shorthand (see table below); takes priority over all other date flags
+- `--days N` — look back N days (default 30, ignored when --period is set)
+- `--start YYYY-MM-DD` — start date (overrides --days, ignored when --period is set)
+- `--end YYYY-MM-DD` — end date (overrides --days, ignored when --period is set)
+
+**`--period` presets:**
+
+| Value | Meaning |
+|-------|---------|
+| `today` | Today only |
+| `yesterday` | Yesterday only |
+| `last7d` / `7d` | Last 7 days |
+| `last14d`, `last30d`, `last90d` … | Last N days |
+| `currentWeek` / `thisWeek` | Monday → today |
+| `lastWeek` | Previous Mon–Sun |
+| `currentMonth` / `thisMonth` | 1st of month → today |
+| `lastMonth` | Full previous month |
+| `last3m`, `last6m`, `last12m` | Last N months |
+| `currentYear` / `thisYear` | Jan 1 → today |
+| `lastYear` | Full previous year |
+| `1y` / `2y` … | Last N years |
+| `2024`, `2025` … | Full calendar year (or Jan 1 → today for current year) |
 
 ### `insights campaigns`
 
