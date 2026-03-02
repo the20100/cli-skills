@@ -44,6 +44,10 @@ gads-cli auth login
 gads-cli auth login --credentials-file=~/Downloads/client_secret.json \
   --developer-token=YOUR_DEV_TOKEN \
   --manager-account=123-456-7890
+
+# On a remote server / VPS (no browser available)
+gads-cli auth login --credentials-file=~/Downloads/client_secret.json --no-browser
+# Prints the OAuth URL → open it locally → copy the redirect URL from the address bar → paste it
 ```
 
 Credentials are stored in:
@@ -106,12 +110,18 @@ Start the OAuth2 authorization flow. Opens a browser for Google authorization an
 ```bash
 gads-cli auth login
 gads-cli auth login --credentials-file=~/Downloads/client_secret.json --developer-token=TOKEN --manager-account=123-456-7890
+
+# Remote/VPS: no browser available
+gads-cli auth login --credentials-file=~/Downloads/client_secret.json --no-browser
 ```
+
+With `--no-browser`: the CLI prints the OAuth URL. Open it in your local browser, authorize, then copy the full redirect URL from the address bar (it will fail to load — that's expected) and paste it into the terminal.
 
 Flags:
 - `--credentials-file` — path to Google Cloud OAuth2 JSON file
 - `--developer-token` — Google Ads developer token
 - `--manager-account` — Manager Account (MCC) customer ID
+- `--no-browser` — manual flow for remote/VPS environments (no localhost server needed)
 
 ### `auth status`
 
