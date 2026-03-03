@@ -537,6 +537,54 @@ shopify-admin markets get 1234567890
 
 ---
 
+## ltv
+
+Calculate the store's Lifetime Value (LTV).
+
+**Formula:** `LTV = (net_sales − tax) ÷ unique paying customers`
+
+**Default period:** last 3 years, excluding the last 3 months (gives recent data time to settle).
+
+```bash
+# Default: 3y period, excl. last 3 months
+shopify-admin ltv
+
+# Custom period
+shopify-admin ltv --period 2y --exclude 0        # 2 years up to today
+shopify-admin ltv --period 18m --exclude 1        # 18 months, excl. last month
+
+# Explicit dates (override everything)
+shopify-admin ltv --start 2022-01-01 --end 2024-01-01
+
+# JSON output (for agents / further processing)
+shopify-admin ltv --json
+shopify-admin ltv --period 2y --json
+```
+
+**Flags:**
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--start YYYY-MM-DD` | computed | Start date — overrides `--period` |
+| `--end YYYY-MM-DD` | today − exclude | End date |
+| `--period <N>` | `3y` | Look-back: `Ny` years, `Nm` months, `Nd` days |
+| `--exclude <N>` | `3` | Skip last N months from end (0 = up to today) |
+
+**JSON output structure:**
+```json
+{
+  "period": { "start": "2022-01-01", "end": "2025-01-01", "exclude_months": 3, "period": "3y" },
+  "net_sales": 125432.50,
+  "tax": 18214.80,
+  "net_revenue": 107217.70,
+  "customers": 1247,
+  "ltv": 85.98
+}
+```
+
+All monetary values are in the store's default currency.
+
+---
+
 ## Tips
 
 - **Before filtering**: Always run `shopify-admin search-syntax <resource> --json` to discover valid fields and values before constructing a `--query` string
