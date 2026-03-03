@@ -137,7 +137,15 @@ Requires `GDOCS_CLIENT_ID` and `GDOCS_CLIENT_SECRET` env vars.
 export GDOCS_CLIENT_ID=your_client_id
 export GDOCS_CLIENT_SECRET=your_client_secret
 gdocs auth login
+
+# On a remote server / VPS (no browser available)
+gdocs auth login --no-browser
 ```
+
+With `--no-browser`: the CLI prints the OAuth URL. Open it in your local browser, authorize, then copy the full redirect URL from the address bar (it will fail to load — that's expected) and paste it into the terminal.
+
+Flags:
+- `--no-browser` — manual flow for remote/VPS environments (no localhost server needed)
 
 ### `auth status`
 

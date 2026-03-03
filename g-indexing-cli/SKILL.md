@@ -133,7 +133,15 @@ g-indexing auth setup --credentials /path/to/credentials.json
 
 # OAuth2 with explicit flags
 g-indexing auth setup --client-id <id> --client-secret <secret>
+
+# Remote/VPS: no browser available
+g-indexing auth setup --credentials /path/to/credentials.json --no-browser
 ```
+
+With `--no-browser`: the CLI prints the OAuth URL. Open it in your local browser, authorize, then copy the full redirect URL from the address bar (it will fail to load — that's expected) and paste it into the terminal.
+
+Flags:
+- `--no-browser` — manual flow for remote/VPS environments (no localhost server needed)
 
 ### `auth status`
 Show current authentication method and status.

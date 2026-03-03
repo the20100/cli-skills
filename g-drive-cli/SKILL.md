@@ -113,7 +113,15 @@ Open browser for Google OAuth 2.0 flow. Requires `GDRIVE_CLIENT_ID` and `GDRIVE_
 export GDRIVE_CLIENT_ID=<id>
 export GDRIVE_CLIENT_SECRET=<secret>
 gdrive auth login
+
+# On a remote server / VPS (no browser available)
+gdrive auth login --no-browser
 ```
+
+With `--no-browser`: the CLI prints the OAuth URL. Open it in your local browser, authorize, then copy the full redirect URL from the address bar (it will fail to load — that's expected) and paste it into the terminal.
+
+Flags:
+- `--no-browser` — manual flow for remote/VPS environments (no localhost server needed)
 
 ### `auth set-token <token>`
 Save an access token directly (no refresh capability).
