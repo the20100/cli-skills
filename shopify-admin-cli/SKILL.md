@@ -1,6 +1,6 @@
 ---
 name: shopify-admin
-version: 1.0.0
+version: 2.0.0
 description: Use when the user wants to manage their Shopify store — products, collections, orders, customers, inventory, metafields, metaobjects, webhooks, discounts, analytics, fulfillments, markets, or store settings — using the shopify-admin CLI. Trigger on requests like "list my products", "show Shopify orders", "create a product", "check inventory", "run a ShopifyQL query", "set a metafield", "list webhooks", etc.
 ---
 
@@ -28,14 +28,22 @@ rm -rf shopify-admin-cli
 shopify-admin update
 ```
 
-**Authentication:**
-Set credentials once with `shopify-admin auth setup <shop> <access-token>` or via `SHOPIFY_SHOP` and `SHOPIFY_ACCESS_TOKEN` env vars.
+**Authentication (new in v2):**
+Shopify no longer issues permanent tokens from the admin UI. You must use OAuth with a custom app (Client ID + Client Secret from the Shopify Partners dashboard or Dev Dashboard).
+
+Recommended setup (one-time, per store):
+```bash
+shopify-admin auth configure <client-id> <client-secret>
+shopify-admin auth login --shop <shop> --no-browser
+```
+After that, **tokens are auto-refreshed silently** on every command (tokens last 24 h; the CLI refreshes via Client Credentials Grant when needed).
+
 Credentials are stored in:
 - macOS: `~/Library/Application Support/shopify-admin/config.json`
 - Linux: `~/.config/shopify-admin/config.json`
 - Windows: `%AppData%\shopify-admin\config.json`
 
-Get your access token from Shopify Admin → Settings → Apps and sales channels → Develop apps.
+**Important:** If `SHOPIFY_ACCESS_TOKEN` and `SHOPIFY_SHOP` env vars are set they take priority over the config file and bypass auto-refresh. Remove them if you want the config-based OAuth flow to work.
 
 ---
 
@@ -147,10 +155,42 @@ shopify-admin info
 
 ## auth
 
+### OAuth flow (recommended — works with Shopify's new custom app model)
+
 ```bash
-shopify-admin auth setup <shop> <access-token>   # Save credentials (shop = mystore.myshopify.com)
-shopify-admin auth status                         # Show current auth source
-shopify-admin auth logout                         # Remove saved credentials
+# Step 1 — save app credentials from the Partners / Dev Dashboard
+shopify-admin auth configure <client-id> <client-secret>
+
+# Step 2 — install the app and obtain the API token
+#   --no-browser: for remote/headless environments (prints URL, prompts for callback URL)
+#   (omit --no-browser to open a browser automatically on local machines)
+shopify-admin auth login --shop <shop> --no-browser
+shopify-admin auth login --shop <shop>
+
+# Optional flags for auth login:
+#   --scopes <scopes>   comma-separated OAuth scopes (default: all CLI scopes)
+```
+
+**How `--no-browser` works:**
+1. CLI prints the Shopify authorization URL — open it in any browser
+2. Approve the app in Shopify admin
+3. Browser redirects to `http://localhost/callback?code=...` (will fail to load — that's expected)
+4. Copy the full URL from the browser address bar and paste it into the CLI prompt
+5. CLI exchanges the code, then calls Client Credentials Grant to get the real API token
+
+**Token auto-refresh:** Once `client_id`, `client_secret`, and `shop` are in config, every CLI command transparently refreshes the token when it is missing, expired (within 5 min), or is an `shpc_` session token.
+
+### Manual token (legacy / env-var override)
+
+```bash
+shopify-admin auth setup <shop> <access-token>   # Manually save a shop + token
+```
+
+### Status & logout
+
+```bash
+shopify-admin auth status    # Show active credential source, token, and Client ID
+shopify-admin auth logout    # Remove all saved credentials from config
 ```
 
 ---
@@ -500,7 +540,9 @@ shopify-admin markets get 1234567890
 ## Tips
 
 - **Before filtering**: Always run `shopify-admin search-syntax <resource> --json` to discover valid fields and values before constructing a `--query` string
-- **Authentication**: Set `SHOPIFY_ACCESS_TOKEN` and `SHOPIFY_SHOP` for one-off use or automation
+- **Authentication**: Use `auth configure` + `auth login --no-browser` once; tokens auto-refresh forever. Avoid setting `SHOPIFY_ACCESS_TOKEN` env var as it bypasses auto-refresh
+- **401 errors**: If you see `Invalid API key or access token`, check `auth status` — env vars may be overriding the config with a stale token. Unset them with `unset SHOPIFY_ACCESS_TOKEN SHOPIFY_SHOP`
+- **Token type**: `shpc_` tokens are session tokens (not Admin API tokens) — the CLI detects this prefix and auto-refreshes via Client Credentials Grant on the next command
 - **Output is auto-detected**: JSON when piped, tables in terminal. Use `--json` when parsing output
 - **Finding IDs**: Use `shopify-admin products list --json | jq '.[].id'`
 - **Pagination**: Check for `(more results — use --after CURSOR)` at the bottom of list output
