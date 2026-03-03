@@ -329,13 +329,18 @@ Flags:
 
 ## insights
 
-All insights commands support these flags:
-- `--account` *(required)* — customer account ID
-- `--period` — preset period shorthand (see table below); takes priority over all other date flags
-- `--days N` — look back N days (default 30, ignored when --period is set)
-- `--start YYYY-MM-DD` — start date (overrides --days, ignored when --period is set)
-- `--end YYYY-MM-DD` — end date (overrides --days, ignored when --period is set)
-- `--all` — include rows with 0 impressions (by default only rows with at least 1 impression are shown)
+All insights commands support these common flags:
+
+| Flag | Description |
+|------|-------------|
+| `--account` *(required)* | Customer account ID |
+| `--period` | Preset period shorthand (see table below); priority over all date flags |
+| `--days N` | Look back N days (default 30, ignored when `--period` is set) |
+| `--start YYYY-MM-DD` | Start date (overrides `--days`, ignored when `--period` is set) |
+| `--end YYYY-MM-DD` | End date (overrides `--days`, ignored when `--period` is set) |
+| `--all` | Include rows with 0 impressions (default: only rows with activity) |
+| `--preset` | Column preset: `default`, `performance`, `conversions`, `full` (ads: also `creatives`) |
+| `--fields` | Comma-separated field IDs, overrides `--preset` |
 
 **`--period` presets:**
 
@@ -355,45 +360,193 @@ All insights commands support these flags:
 | `1y` / `2y` … | Last N years |
 | `2024`, `2025` … | Full calendar year (or Jan 1 → today for current year) |
 
+---
+
 ### `insights campaigns`
 
-Campaign performance: impressions, clicks, cost, CTR, CPC, conversions, ROAS.
+Campaign performance report.
 
 ```bash
 gads-cli insights campaigns --account=1234567890 --days=30
-gads-cli insights campaigns --account=1234567890 --start=2024-01-01 --end=2024-01-31
+gads-cli insights campaigns --account=1234567890 --period=last30d --preset=performance
+gads-cli insights campaigns --account=1234567890 --period=2025 --preset=conversions
+gads-cli insights campaigns --account=1234567890 --days=7 --fields=campaign_name,impressions,clicks,cost,roas
 gads-cli insights campaigns --account=1234567890 --days=7 --json
 ```
 
+**Presets:**
+
+| Preset | Fields shown |
+|--------|-------------|
+| `default` | campaign_name, campaign_status, impressions, clicks, cost, ctr, cpc, conversions, roas |
+| `performance` | + abs_top_imp_pct, top_imp_pct, conv_rate, cost_per_conv |
+| `conversions` | campaign_name, campaign_status, conversions, conv_value, view_through_conv, conv_rate, cost_per_conv, roas |
+| `full` | All available fields |
+
+**Available field IDs:**
+
+| Field ID | GAQL field | Description |
+|----------|------------|-------------|
+| `campaign_id` | `campaign.id` | Campaign ID |
+| `campaign_name` | `campaign.name` | Campaign name |
+| `campaign_status` | `campaign.status` | Campaign status |
+| `campaign_type` | `campaign.advertising_channel_type` | Campaign type (SEARCH, DISPLAY, etc.) |
+| `impressions` | `metrics.impressions` | Impression count |
+| `clicks` | `metrics.clicks` | Click count |
+| `cost` | `metrics.cost_micros` | Cost (in currency units) |
+| `ctr` | `metrics.ctr` | Click-through rate |
+| `cpc` | `metrics.average_cpc` | Average cost per click |
+| `conversions` | `metrics.conversions` | Conversion count |
+| `conv_value` | `metrics.conversions_value` | Total conversion value |
+| `roas` | computed | Return on ad spend (conv_value / cost) |
+| `abs_top_imp_pct` | `metrics.absolute_top_impression_percentage` | % impressions at absolute top position |
+| `top_imp_pct` | `metrics.top_impression_percentage` | % impressions at top of page |
+| `view_through_conv` | `metrics.view_through_conversions` | View-through conversions |
+| `cost_per_conv` | `metrics.cost_per_conversion` | Cost per conversion |
+| `conv_rate` | `metrics.conversions_from_interactions_rate` | Conversion rate |
+| `search_imp_share` | `metrics.search_impression_share` | Search impression share |
+
+---
+
 ### `insights adgroups`
 
-Ad group performance metrics.
+Ad group performance report. Requires `--campaign`.
 
 ```bash
 gads-cli insights adgroups --account=1234567890 --campaign=111222333 --days=30
+gads-cli insights adgroups --account=1234567890 --campaign=111222333 --preset=performance
 ```
 
-Additional flag: `--campaign` *(required)*
+**Presets:**
+
+| Preset | Fields shown |
+|--------|-------------|
+| `default` | adgroup_name, adgroup_status, impressions, clicks, cost, ctr, cpc, conversions, roas |
+| `performance` | + campaign_name, conv_rate, cost_per_conv, abs_top_imp_pct, top_imp_pct |
+| `conversions` | campaign_name, adgroup_name, adgroup_status, conversions, conv_value, view_through_conv, conv_rate, cost_per_conv, roas |
+| `full` | All available fields |
+
+**Additional field IDs (beyond metrics listed above):**
+
+| Field ID | GAQL field | Description |
+|----------|------------|-------------|
+| `campaign_name` | `campaign.name` | Campaign name |
+| `adgroup_id` | `ad_group.id` | Ad group ID |
+| `adgroup_name` | `ad_group.name` | Ad group name |
+| `adgroup_status` | `ad_group.status` | Ad group status |
+
+---
 
 ### `insights keywords`
 
-Keyword performance metrics.
+Keyword performance report. Requires `--campaign`.
 
 ```bash
 gads-cli insights keywords --account=1234567890 --campaign=111222333 --days=30
+gads-cli insights keywords --account=1234567890 --campaign=111222333 --preset=performance
 ```
 
-Additional flag: `--campaign` *(required)*
+**Presets:**
+
+| Preset | Fields shown |
+|--------|-------------|
+| `default` | keyword_text, keyword_match, keyword_status, impressions, clicks, cost, ctr, cpc, conversions, quality_score |
+| `performance` | + campaign_name, adgroup_name, roas, conv_rate, cost_per_conv |
+| `conversions` | keyword_text, keyword_match, keyword_status, conversions, conv_value, conv_rate, cost_per_conv, roas |
+| `full` | All available fields |
+
+**Additional field IDs:**
+
+| Field ID | GAQL field | Description |
+|----------|------------|-------------|
+| `keyword_text` | `ad_group_criterion.keyword.text` | Keyword text |
+| `keyword_match` | `ad_group_criterion.keyword.match_type` | Match type (BROAD, PHRASE, EXACT) |
+| `keyword_status` | `ad_group_criterion.status` | Keyword status |
+| `quality_score` | `ad_group_criterion.quality_info.quality_score` | Quality score (1–10) |
+
+---
 
 ### `insights search-terms`
 
-Search terms report — shows which search queries triggered your ads.
+Search terms report. Requires `--campaign`.
 
 ```bash
 gads-cli insights search-terms --account=1234567890 --campaign=111222333 --days=30
+gads-cli insights search-terms --account=1234567890 --campaign=111222333 --preset=performance
 ```
 
-Additional flag: `--campaign` *(required)*
+**Presets:**
+
+| Preset | Fields shown |
+|--------|-------------|
+| `default` | search_term, st_status, adgroup_name, impressions, clicks, cost, ctr, conversions |
+| `performance` | + campaign_name, cpc, roas, conv_rate, cost_per_conv |
+| `conversions` | search_term, st_status, campaign_name, adgroup_name, conversions, conv_value, conv_rate, cost_per_conv, roas |
+| `full` | All available fields |
+
+**Additional field IDs:**
+
+| Field ID | GAQL field | Description |
+|----------|------------|-------------|
+| `search_term` | `search_term_view.search_term` | Search query that triggered the ad |
+| `st_status` | `search_term_view.status` | Search term status (ADDED, EXCLUDED, etc.) |
+
+---
+
+### `insights ads`
+
+Ad-level performance with creative fields (RSA headlines, descriptions, URLs). `--campaign` is optional.
+
+```bash
+gads-cli insights ads --account=1234567890 --days=30
+gads-cli insights ads --account=1234567890 --campaign=111222333 --preset=creatives
+gads-cli insights ads --account=1234567890 --days=7 --fields=campaign_name,ad_name,headline1,headline2,headline3,desc1,desc2
+gads-cli insights ads --account=1234567890 --days=30 --json
+```
+
+**Presets:**
+
+| Preset | Fields shown |
+|--------|-------------|
+| `default` | campaign_name, adgroup_name, ad_name, ad_status, ad_type, final_url + core metrics |
+| `performance` | campaign_name, adgroup_name, ad_name, ad_status + full metrics + impression share |
+| `creatives` | campaign_name, adgroup_name, ad_name, ad_status, ad_type, final_url, display_url, path1, path2, headline1–15, desc1–4 |
+| `full` | All dimensions + all RSA/ETA creative fields + all metrics |
+
+**Ad dimension field IDs:**
+
+| Field ID | GAQL field | Description |
+|----------|------------|-------------|
+| `ad_id` | `ad_group_ad.ad.id` | Ad ID |
+| `ad_name` | `ad_group_ad.ad.name` | Ad name |
+| `ad_status` | `ad_group_ad.status` | Ad status (ENABLED, PAUSED, etc.) |
+| `ad_type` | `ad_group_ad.ad.type` | Ad type (RESPONSIVE_SEARCH_AD, EXPANDED_TEXT_AD, etc.) |
+| `final_url` | `ad_group_ad.ad.final_urls` | Final destination URL |
+| `final_mobile_url` | `ad_group_ad.ad.final_mobile_urls` | Final mobile URL |
+| `tracking_url` | `ad_group_ad.ad.tracking_url_template` | Tracking URL template |
+| `url_suffix` | `ad_group_ad.ad.final_url_suffix` | Final URL suffix |
+| `display_url` | `ad_group_ad.ad.display_url` | Display URL |
+| `path1` | `ad_group_ad.ad.responsive_search_ad.path1` | URL path 1 |
+| `path2` | `ad_group_ad.ad.responsive_search_ad.path2` | URL path 2 |
+
+**RSA creative field IDs:**
+
+| Field ID | GAQL field | Description |
+|----------|------------|-------------|
+| `headline1`…`headline15` | `ad_group_ad.ad.responsive_search_ad.headlines` | RSA headline text (by array index) |
+| `headline1_pos`…`headline15_pos` | `ad_group_ad.ad.responsive_search_ad.headlines` | RSA headline pinned position |
+| `desc1`…`desc4` | `ad_group_ad.ad.responsive_search_ad.descriptions` | RSA description text |
+| `desc1_pos`…`desc4_pos` | `ad_group_ad.ad.responsive_search_ad.descriptions` | RSA description pinned position |
+
+**ETA (legacy Expanded Text Ad) field IDs:**
+
+| Field ID | GAQL field | Description |
+|----------|------------|-------------|
+| `eta_headline1` | `ad_group_ad.ad.expanded_text_ad.headline_part1` | ETA headline 1 |
+| `eta_headline2` | `ad_group_ad.ad.expanded_text_ad.headline_part2` | ETA headline 2 |
+| `eta_headline3` | `ad_group_ad.ad.expanded_text_ad.headline_part3` | ETA headline 3 |
+| `eta_desc1` | `ad_group_ad.ad.expanded_text_ad.description` | ETA description 1 |
+| `eta_desc2` | `ad_group_ad.ad.expanded_text_ad.description2` | ETA description 2 |
 
 ---
 
@@ -407,3 +560,5 @@ Additional flag: `--campaign` *(required)*
 - **Output is auto-detected**: JSON when piped, tables in terminal. Use `--json` when parsing output.
 - **Finding IDs**: use `gads-cli campaigns list --account=ID --json | jq '.[].Campaign.id'`
 - **API version**: Uses Google Ads REST API v23.
+- **Field selection**: use `--preset=performance` for quick access to common metric sets, or `--fields=field1,field2,...` for full control.
+- **Creative audits**: use `gads-cli insights ads --preset=creatives --json` for full RSA headline/description data.
