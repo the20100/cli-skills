@@ -17,7 +17,7 @@ Run commands with the Bash tool. Find the binary by running `which gslides` or l
 which gslides
 
 # If not found, clone, build, install, then delete the source folder
-git clone https://github.com/the20100/g-slides-cli
+git clone https://github.com/the20100/gslides-cli
 cd g-slides-cli
 GOMODCACHE=/tmp/gomodcache go build -o gslides .
 mv gslides /usr/local/bin/
