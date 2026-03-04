@@ -1,7 +1,7 @@
 ---
 name: meta-ads
-version: 1.2.0
-description: Use when the user wants to manage Meta (Facebook/Instagram) ads, campaigns, ad sets, audiences, pixels, or insights using the meta-ads CLI. Trigger on requests like "list my campaigns", "pause that ad set", "show me insights", "check my Meta ads", "what's my ad spend", etc.
+version: 1.3.0
+description: Use when the user wants to manage Meta (Facebook/Instagram) ads, campaigns, ad sets, audiences, pixels, or insights using the meta-ads CLI. Trigger on requests like "list my campaigns", "pause that ad set", "show me insights", "check my Meta ads", "what's my ad spend", "audit my account", "export account data", etc.
 ---
 
 # Meta Ads CLI
@@ -210,6 +210,44 @@ Use `--json` to get the raw API response with full rule JSON (includes inclusion
 ### `pixels list`
 List Meta pixels for an account (ID, name, last fired time).
 - `--account <id>`
+
+---
+
+## audit-export
+
+### `audit-export`
+Export a complete account audit as a structured document. Includes campaign/adset/ad configuration (budgets, targeting, creative) and performance metrics for the specified period.
+
+**Flags:**
+- `--period <period>` — Predefined period: `7d`, `30d`, `3m` (default), `6m`, `1y`
+- `--start <YYYY-MM-DD>` — Custom start date (overrides `--period`)
+- `--end <YYYY-MM-DD>` — Custom end date (overrides `--period`)
+- `--all` — Include all items, even with zero impressions (default: only active/with impressions)
+- `--format <format>` — Output format: `json` (default), `csv`, `md`
+- `-o, --output <path>` — Output file path (stdout if omitted)
+
+**Defaults:** last 3 months, only items with impressions, JSON format.
+
+**Metrics included:** Spend, Impressions, Reach, CPM, Frequency, Link Clicks, CTR, Video Views 3s, Video Views 15s (ThruPlay), Hook Ratio (3s views / impressions), Hold Rate (ThruPlay / 3s views), Add to Cart, Cost/ATC, Purchases, Cost/Purchase, Purchase Value, ROAS, Conversion Rate (purchases / clicks), Engagement Rate, Leads, Cost/Lead.
+
+**Output structure (JSON):** Hierarchical — `campaigns → adsets → ads`. Each level includes full configuration and metrics. Adsets include full targeting details. Ads include creative details (body, title, CTA, link URL, image URL, video ID).
+
+```bash
+# Default: last 3 months, active items, JSON to stdout
+meta-ads audit-export -a act_123456789
+
+# Last 30 days, save to file
+meta-ads audit-export -a act_123456789 --period 30d -o audit.json
+
+# Custom date range, CSV
+meta-ads audit-export -a act_123456789 --start 2026-01-01 --end 2026-02-01 --format csv -o audit.csv
+
+# Markdown report
+meta-ads audit-export -a act_123456789 --format md -o report.md
+
+# Include everything (even zero-impression items)
+meta-ads audit-export -a act_123456789 --all
+```
 
 ---
 
