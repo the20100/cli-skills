@@ -1,6 +1,6 @@
 ---
 name: meta-ads
-version: 1.1.0
+version: 1.2.0
 description: Use when the user wants to manage Meta (Facebook/Instagram) ads, campaigns, ad sets, audiences, pixels, or insights using the meta-ads CLI. Trigger on requests like "list my campaigns", "pause that ad set", "show me insights", "check my Meta ads", "what's my ad spend", etc.
 ---
 
@@ -139,7 +139,11 @@ List all ad sets for an account.
 - `--status <STATUS>` — filter by status
 
 ### `adsets get <adset_id>`
-Full details for one ad set.
+Full details for one ad set including targeting configuration, campaign info, and attribution.
+
+Returns: ID, name, status, campaign (name + objective), daily/lifetime budget, bid amount, bid strategy, billing event, optimization goal, destination type, start/end time, **targeting** (age, gender, geo, platforms, positions, included/excluded custom audiences), promoted object, attribution spec, pacing type.
+
+Use `--json` to get the raw API response with full nested targeting and promoted object structures.
 
 ### `adsets pause <adset_id>`
 Pause an ad set.
@@ -188,6 +192,13 @@ Common fields: `impressions`, `clicks`, `spend`, `reach`, `ctr`, `cpc`, `cpm`, `
 ### `audiences list`
 List custom audiences for an account (ID, name, subtype, size range, delivery status).
 - `--account <id>`
+
+### `audiences get <audience_id>`
+Full details for one custom audience including construction rules.
+
+Returns: ID, name, subtype, description, pixel ID, retention days, approximate size (lower/upper), delivery status, creation/update timestamps, **construction rules** (event sources, events, filters, retention periods).
+
+Use `--json` to get the raw API response with full rule JSON (includes inclusions/exclusions with event sources, retention seconds, and filter conditions).
 
 ---
 
