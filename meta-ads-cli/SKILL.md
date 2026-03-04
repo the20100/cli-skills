@@ -137,9 +137,11 @@ List all ad sets for an account.
 - `--account <id>`
 - `--campaign <campaign_id>` — filter by campaign
 - `--status <STATUS>` — filter by status
+- `--name-contains <text>` — filter ad sets whose name contains this string (case-insensitive)
 
 ### `adsets get <adset_id>`
 Full details for one ad set including targeting configuration, campaign info, and attribution.
+- `--fields <fields>` — comma-separated fields to request (overrides defaults). Example: `--fields id,name,targeting,promoted_object`
 
 Returns: ID, name, status, campaign (name + objective), daily/lifetime budget, bid amount, bid strategy, billing event, optimization goal, destination type, start/end time, **targeting** (age, gender, geo, platforms, positions, included/excluded custom audiences), promoted object, attribution spec, pacing type.
 
@@ -195,6 +197,7 @@ List custom audiences for an account (ID, name, subtype, size range, delivery st
 
 ### `audiences get <audience_id>`
 Full details for one custom audience including construction rules.
+- `--fields <fields>` — comma-separated fields to request (overrides defaults). Example: `--fields id,name,rule,retention_days,pixel_id`
 
 Returns: ID, name, subtype, description, pixel ID, retention days, approximate size (lower/upper), delivery status, creation/update timestamps, **construction rules** (event sources, events, filters, retention periods).
 
