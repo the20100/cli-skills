@@ -8,16 +8,21 @@ description: Use when the user wants to manage Typeform forms, responses, worksp
 
 The `typeform` CLI manages Typeform forms, responses, workspaces, themes, images, and webhooks via the Typeform REST API.
 
-Run commands with the Bash tool. The binary is located at `/Users/vincentmaurin/go/bin/typeform`. If not found, install:
+Run commands with the Bash tool. Find the binary by running `which typeform` or look in the standard PATH. The binary name is `typeform`.
+
+**If the `typeform` binary is not found**, install it first:
 
 ```bash
 # Check if available
 which typeform
 
 # If not found, clone, build, install, then delete the source folder
-cd /Users/vincentmaurin/Work/AI/AIv2/CLIs/typeform-cli
+git clone https://github.com/the20100/typeform-cli
+cd typeform-cli
 go build -o typeform .
-cp typeform /Users/vincentmaurin/go/bin/typeform
+mv typeform /usr/local/bin/
+cd ..
+rm -rf typeform-cli
 
 # If found, update to latest version
 typeform update
