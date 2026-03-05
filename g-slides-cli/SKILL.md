@@ -1,6 +1,6 @@
 ---
 name: gslides
-version: 1.0.0
+version: 1.1.0
 description: Use when the user wants to manage Google Slides presentations using the gslides CLI. Trigger on requests like "create a presentation", "list my slides", "add a slide", "get presentation details", "replace text in slides", "get slide thumbnail", "batch update presentation", etc.
 ---
 
@@ -18,34 +18,65 @@ which gslides
 
 # If not found, clone, build, install, then delete the source folder
 git clone https://github.com/the20100/gslides-cli
-cd g-slides-cli
-GOMODCACHE=/tmp/gomodcache go build -o gslides .
+cd gslides-cli
+go build -o gslides .
 mv gslides /usr/local/bin/
 cd ..
-rm -rf g-slides-cli
+rm -rf gslides-cli
 
 # If found, check if the last version is installed
 gslides update
 ```
 
 **Authentication:**
-Two methods are supported:
 
-- **Service account** (recommended for automation):
-  ```bash
-  gslides auth setup --service-account /path/to/sa.json
-  # or: export GOOGLE_APPLICATION_CREDENTIALS=/path/to/sa.json
-  ```
+Token/credential resolution order:
+1. `GSLIDES_ACCESS_TOKEN` env var (access token, direct)
+2. `GOOGLE_APPLICATION_CREDENTIALS` or `GSLIDES_CREDENTIALS` env var (service account JSON file path)
+3. Config service account file (set with `gslides auth set-credentials`)
+4. Config OAuth token (set with `gslides auth login` or `gslides auth set-token`)
 
-- **OAuth2** (for personal/interactive use):
-  ```bash
-  gslides auth setup --credentials /path/to/credentials.json
-  ```
+**Option 1 — Browser OAuth flow** (persistent, with auto-refresh):
+
+Client credentials are resolved automatically in order:
+1. `GSLIDES_CLIENT_ID` + `GSLIDES_CLIENT_SECRET` env vars
+2. Config stored credentials (set with `gslides auth set-client-secret`)
+3. `GSLIDES_CLIENT_SECRET_FILE` env var (path to client_secret.json)
+4. `--client-secret-file` flag
+5. Default path: `~/.config/google/client_secret.json` (Linux) or `~/Library/Application Support/google/client_secret.json` (macOS)
+
+```bash
+# With env vars
+export GSLIDES_CLIENT_ID=your_client_id
+export GSLIDES_CLIENT_SECRET=your_client_secret
+gslides auth login
+
+# Or save the client_secret.json once:
+gslides auth set-client-secret /path/to/client_secret.json
+gslides auth login
+
+# On a remote server / VPS (no browser available)
+gslides auth login --no-browser
+```
+
+**Option 2 — Service account** (for automation, no user interaction):
+```bash
+gslides auth set-credentials /path/to/service-account.json
+# or
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+```
+
+**Option 3 — Direct token** (quick, no refresh):
+```bash
+gslides auth set-token $(gcloud auth print-access-token)
+# or
+export GSLIDES_ACCESS_TOKEN=$(gcloud auth print-access-token)
+```
 
 Credentials are stored in:
-- macOS: `~/Library/Application Support/g-slides/config.json`
-- Linux: `~/.config/g-slides/config.json`
-- Windows: `%AppData%\g-slides\config.json`
+- macOS: `~/Library/Application Support/gslides/config.json`
+- Linux: `~/.config/gslides/config.json`
+- Windows: `%AppData%\gslides\config.json`
 
 Get credentials at: https://console.cloud.google.com/apis/credentials
 
@@ -53,36 +84,32 @@ Get credentials at: https://console.cloud.google.com/apis/credentials
 
 ## Environment variables
 
-**Service Account Credentials file path** — the following env var names are accepted (first non-empty wins):
+**Access Token** — the following env var names are accepted (first non-empty wins):
 
 | Variable | Notes |
 |----------|-------|
-| `GOOGLE_APPLICATION_CREDENTIALS` | Primary (canonical, standard Google) |
-| `GOOGLE_CREDENTIALS` | Short Google form |
-| `GCP_APPLICATION_CREDENTIALS` | GCP-prefixed form |
-| `GCP_CREDENTIALS` | Short GCP form |
-| `GOOGLE_SERVICE_ACCOUNT_FILE` | Explicit service account form |
-| `GCLOUD_CREDENTIALS` | gcloud tool naming |
+| `GSLIDES_ACCESS_TOKEN` | Primary (canonical) |
+| `GSLIDES_TOKEN` | Short form |
+| `GOOGLE_SLIDES_TOKEN` | Google-prefixed form |
+| `GSLIDES_BEARER_TOKEN` | Bearer token form |
+| `GOOGLE_SLIDES_ACCESS_TOKEN` | Full Google form |
+| `GSLIDES_ACCESS` | Minimal form |
+| `TOKEN_GSLIDES` | Reversed |
 
-**OAuth Client ID (for OAuth2 auth method):**
-
-| Variable | Notes |
-|----------|-------|
-| `GOOGLE_CLIENT_ID` | Primary (canonical) |
-| `GOOGLE_OAUTH_CLIENT_ID` | OAuth-specific form |
-| `GCP_CLIENT_ID` | GCP-prefixed form |
-| `GCLOUD_CLIENT_ID` | gcloud tool naming |
-| `GOOGLE_CLIENT` | Short form |
-
-**OAuth Client Secret:**
+**Service Account credentials file path:**
 
 | Variable | Notes |
 |----------|-------|
-| `GOOGLE_CLIENT_SECRET` | Primary (canonical) |
-| `GOOGLE_OAUTH_CLIENT_SECRET` | OAuth-specific form |
-| `GCP_CLIENT_SECRET` | GCP-prefixed form |
-| `GCLOUD_CLIENT_SECRET` | gcloud tool naming |
-| `GOOGLE_SECRET` | Short form |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Standard Google form |
+| `GSLIDES_CREDENTIALS` | Slides-specific form |
+
+**OAuth Client credentials (for `gslides auth login`):**
+
+| Variable | Notes |
+|----------|-------|
+| `GSLIDES_CLIENT_ID` | Primary (canonical) |
+| `GSLIDES_CLIENT_SECRET` | Primary (canonical) |
+| `GSLIDES_CLIENT_SECRET_FILE` | Path to client_secret.json file |
 
 ---
 
@@ -119,23 +146,57 @@ gslides info
 
 ## auth
 
-### `auth setup`
+### `auth login`
 
-Configure authentication (service account or OAuth2).
+Browser OAuth flow — opens Google sign-in in your browser and saves the token with auto-refresh capability.
+
+Client credentials are auto-resolved (see Authentication section above). Use `--client-secret-file` to override.
 
 ```bash
-gslides auth setup --service-account /path/to/sa.json
-gslides auth setup --credentials /path/to/credentials.json
-gslides auth setup --client-id <id> --client-secret <secret>
+# With env vars
+export GSLIDES_CLIENT_ID=your_client_id
+export GSLIDES_CLIENT_SECRET=your_client_secret
+gslides auth login
 
-# Remote/VPS: no browser available
-gslides auth setup --credentials /path/to/credentials.json --no-browser
+# With saved client_secret.json
+gslides auth set-client-secret /path/to/client_secret.json
+gslides auth login
+
+# On a remote server / VPS (no browser available)
+gslides auth login --no-browser
 ```
 
 With `--no-browser`: the CLI prints the OAuth URL. Open it in your local browser, authorize, then copy the full redirect URL from the address bar (it will fail to load — that's expected) and paste it into the terminal.
 
 Flags:
-- `--no-browser` — manual flow for remote/VPS environments (no localhost server needed)
+- `--no-browser` — manual flow for remote/VPS environments
+- `--client-secret-file <path>` — path to client_secret.json (overrides default lookup)
+
+### `auth set-token <token>`
+
+Save a Google access token directly (no refresh capability).
+
+```bash
+gslides auth set-token $(gcloud auth print-access-token)
+gslides auth set-token ya29.a0AfH6...
+```
+
+### `auth set-client-secret <path>`
+
+Save the path to a `client_secret.json` file for OAuth login. Download from Google Cloud Console (Desktop application type).
+
+```bash
+gslides auth set-client-secret /path/to/client_secret.json
+# Then run: gslides auth login
+```
+
+### `auth set-credentials <path>`
+
+Save a service account JSON key file path for service account authentication.
+
+```bash
+gslides auth set-credentials /path/to/service-account.json
+```
 
 ### `auth status`
 
@@ -297,10 +358,10 @@ gslides slide replace-text <id> --old "DRAFT" --new "" --match-case
 
 ## Tips
 
-- **Authentication**: service accounts work best for automation; OAuth2 for personal use
+- **Authentication**: use `gslides auth login` for persistent OAuth with auto-refresh; use `gslides auth set-credentials` for service account automation
+- **client_secret.json**: run `gslides auth set-client-secret /path/to/client_secret.json` once, then just `gslides auth login`
 - **Finding slide IDs**: use `gslides presentation slides <id>` to list all slide object IDs
 - **Finding element IDs**: use `gslides slide get <presentation-id> <slide-id>` to see element object IDs
 - **Complex edits**: use `presentation batch-update` with a JSON file for multi-step operations
 - **Update**: run `gslides update` to pull the latest version from GitHub
 - **Output is auto-detected**: JSON when piped, tables in terminal. Use `--json` when parsing output
-- **Build note**: if building from source, use `GOMODCACHE=/tmp/gomodcache go build` if you hit permission errors

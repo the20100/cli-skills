@@ -1,6 +1,6 @@
 ---
 name: gdocs
-version: 1.0.0
+version: 1.1.0
 description: Use when the user wants to manage Google Docs documents using the gdocs CLI. Trigger on requests like "create a Google Doc", "read the content of a doc", "insert text into a document", "find and replace in a Google Doc", "get document info", "delete text from a doc", etc.
 ---
 
@@ -30,21 +30,45 @@ gdocs update
 
 **Authentication:**
 
-Token resolution order: `GDOCS_ACCESS_TOKEN` env var → stored config file.
+Token/credential resolution order:
+1. `GDOCS_ACCESS_TOKEN` env var (access token, direct)
+2. `GOOGLE_APPLICATION_CREDENTIALS` or `GDOCS_CREDENTIALS` env var (service account JSON file path)
+3. Config service account file (set with `gdocs auth set-credentials`)
+4. Config OAuth token (set with `gdocs auth login` or `gdocs auth set-token`)
 
-Option 1 — gcloud CLI (simplest, token expires ~1h):
+**Option 1 — gcloud CLI** (simplest, token expires ~1h):
 ```bash
 gdocs auth set-token $(gcloud auth print-access-token)
 ```
 
-Option 2 — Browser OAuth flow (persistent, requires GDOCS_CLIENT_ID + GDOCS_CLIENT_SECRET):
+**Option 2 — Browser OAuth flow** (persistent, with auto-refresh):
+
+Client credentials are resolved automatically in order:
+1. `GDOCS_CLIENT_ID` + `GDOCS_CLIENT_SECRET` env vars
+2. Config stored credentials (set with `gdocs auth set-client-secret`)
+3. `GDOCS_CLIENT_SECRET_FILE` env var (path to client_secret.json)
+4. `--client-secret-file` flag
+5. Default path: `~/.config/google/client_secret.json` (Linux) or `~/Library/Application Support/google/client_secret.json` (macOS)
+
 ```bash
+# Either set env vars:
+export GDOCS_CLIENT_ID=your_client_id
+export GDOCS_CLIENT_SECRET=your_client_secret
 gdocs auth login
+
+# Or save the client_secret.json once:
+gdocs auth set-client-secret /path/to/client_secret.json
+gdocs auth login
+
+# On a remote server / VPS (no browser available)
+gdocs auth login --no-browser
 ```
 
-Option 3 — Environment variable (no config file):
+**Option 3 — Service account** (for automation, no user interaction):
 ```bash
-export GDOCS_ACCESS_TOKEN=$(gcloud auth print-access-token)
+gdocs auth set-credentials /path/to/service-account.json
+# or
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 ```
 
 Credentials are stored in:
@@ -70,19 +94,20 @@ Get OAuth credentials from: https://console.cloud.google.com/ (enable Google Doc
 | `GDOCS_ACCESS` | Minimal form |
 | `TOKEN_GDOCS` | Reversed |
 
+**Service Account credentials file path:**
+
+| Variable | Notes |
+|----------|-------|
+| `GOOGLE_APPLICATION_CREDENTIALS` | Standard Google form |
+| `GDOCS_CREDENTIALS` | Docs-specific form |
+
 **OAuth Client credentials (for `gdocs auth login`):**
 
 | Variable | Notes |
 |----------|-------|
 | `GDOCS_CLIENT_ID` | Primary (canonical) |
-| `GOOGLE_CLIENT_ID` | Standard Google name |
-| `GDOCS_OAUTH_CLIENT_ID` | OAuth-specific form |
-
-| Variable | Notes |
-|----------|-------|
 | `GDOCS_CLIENT_SECRET` | Primary (canonical) |
-| `GOOGLE_CLIENT_SECRET` | Standard Google name |
-| `GDOCS_OAUTH_SECRET` | OAuth-specific form |
+| `GDOCS_CLIENT_SECRET_FILE` | Path to client_secret.json file |
 
 ---
 
@@ -119,23 +144,20 @@ gdocs info
 
 ## auth
 
-### `auth set-token <token>`
-
-Save a Google OAuth access token to the config file.
-
-```bash
-gdocs auth set-token $(gcloud auth print-access-token)
-gdocs auth set-token ya29.a0AfH6...
-```
-
 ### `auth login`
 
-Browser OAuth flow — opens Google sign-in in your browser and saves the token.
-Requires `GDOCS_CLIENT_ID` and `GDOCS_CLIENT_SECRET` env vars.
+Browser OAuth flow — opens Google sign-in in your browser and saves the token with auto-refresh capability.
+
+Client credentials are auto-resolved (see Authentication section above). Use `--client-secret-file` to override.
 
 ```bash
+# With env vars
 export GDOCS_CLIENT_ID=your_client_id
 export GDOCS_CLIENT_SECRET=your_client_secret
+gdocs auth login
+
+# With saved client_secret.json
+gdocs auth set-client-secret /path/to/client_secret.json
 gdocs auth login
 
 # On a remote server / VPS (no browser available)
@@ -145,11 +167,38 @@ gdocs auth login --no-browser
 With `--no-browser`: the CLI prints the OAuth URL. Open it in your local browser, authorize, then copy the full redirect URL from the address bar (it will fail to load — that's expected) and paste it into the terminal.
 
 Flags:
-- `--no-browser` — manual flow for remote/VPS environments (no localhost server needed)
+- `--no-browser` — manual flow for remote/VPS environments
+- `--client-secret-file <path>` — path to client_secret.json (overrides default lookup)
+
+### `auth set-token <token>`
+
+Save a Google access token directly (no refresh capability).
+
+```bash
+gdocs auth set-token $(gcloud auth print-access-token)
+gdocs auth set-token ya29.a0AfH6...
+```
+
+### `auth set-client-secret <path>`
+
+Save the path to a `client_secret.json` file for OAuth login. Download from Google Cloud Console (Desktop application type).
+
+```bash
+gdocs auth set-client-secret /path/to/client_secret.json
+# Then run: gdocs auth login
+```
+
+### `auth set-credentials <path>`
+
+Save a service account JSON key file path for service account authentication.
+
+```bash
+gdocs auth set-credentials /path/to/service-account.json
+```
 
 ### `auth status`
 
-Show current authentication status and which token source is active.
+Show current authentication status and which credential source is active.
 
 ```bash
 gdocs auth status
@@ -157,7 +206,7 @@ gdocs auth status
 
 ### `auth logout`
 
-Remove the saved access token from the config file.
+Remove the saved credentials from the config file.
 
 ```bash
 gdocs auth logout
@@ -250,6 +299,8 @@ Flags:
 
 - **Document IDs**: found in Google Docs URLs — `docs.google.com/document/d/<ID>/edit`
 - **Auth**: use `gdocs auth set-token $(gcloud auth print-access-token)` for quick setup; tokens expire in ~1h
+- **Persistent auth**: use `gdocs auth login` for auto-refresh (never expires until revoked)
+- **Service account**: use `gdocs auth set-credentials /path/to/sa.json` for automation
 - **Update**: run `gdocs update` to pull the latest version from GitHub
 - **Output is auto-detected**: JSON when piped, tables in terminal. Use `--json` when parsing output
 - **Inserting newlines**: use `$'text\n'` in bash or pass `\n` in the string

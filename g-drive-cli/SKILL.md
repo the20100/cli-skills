@@ -1,6 +1,6 @@
 ---
 name: g-drive-cli
-version: 1.0.0
+version: 1.1.0
 description: Use when the user wants to manage Google Drive files, folders, shared drives, permissions, or changes using the gdrive CLI. Trigger on requests like "list my Drive files", "download a file from Drive", "share a Drive file", "list shared drives", "check Drive changes", "export a Google Doc", etc.
 ---
 
@@ -30,9 +30,48 @@ gdrive update
 
 **Authentication:**
 
-Google Drive uses OAuth 2.0. Set up once with `gdrive auth login` using a Google Cloud OAuth 2.0 Client ID. Credentials are stored with auto-refresh capability.
+Token/credential resolution order:
+1. `GDRIVE_ACCESS_TOKEN` env var (access token, direct)
+2. `GOOGLE_APPLICATION_CREDENTIALS` or `GDRIVE_CREDENTIALS` env var (service account JSON file path)
+3. Config service account file (set with `gdrive auth set-credentials`)
+4. Config OAuth token (set with `gdrive auth login` or `gdrive auth set-token`)
 
-Alternatively, set `GDRIVE_ACCESS_TOKEN` env var for direct token use (no auto-refresh).
+**Option 1 — Browser OAuth flow** (persistent, with auto-refresh):
+
+Client credentials are resolved automatically in order:
+1. `GDRIVE_CLIENT_ID` + `GDRIVE_CLIENT_SECRET` env vars
+2. Config stored credentials (set with `gdrive auth set-client-secret`)
+3. `GDRIVE_CLIENT_SECRET_FILE` env var (path to client_secret.json)
+4. `--client-secret-file` flag
+5. Default path: `~/.config/google/client_secret.json` (Linux) or `~/Library/Application Support/google/client_secret.json` (macOS)
+
+```bash
+# With env vars
+export GDRIVE_CLIENT_ID=your_client_id
+export GDRIVE_CLIENT_SECRET=your_client_secret
+gdrive auth login
+
+# Or save the client_secret.json once:
+gdrive auth set-client-secret /path/to/client_secret.json
+gdrive auth login
+
+# On a remote server / VPS (no browser available)
+gdrive auth login --no-browser
+```
+
+**Option 2 — Service account** (for automation, no user interaction):
+```bash
+gdrive auth set-credentials /path/to/service-account.json
+# or
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+```
+
+**Option 3 — Direct token** (quick, no refresh):
+```bash
+gdrive auth set-token ya29.xxx...
+# or
+export GDRIVE_ACCESS_TOKEN=ya29.xxx...
+```
 
 Credentials are stored in:
 - macOS: `~/Library/Application Support/gdrive/config.json`
@@ -57,19 +96,20 @@ Create OAuth credentials at: https://console.cloud.google.com/apis/credentials (
 | `GDRIVE_ACCESS` | Minimal form |
 | `TOKEN_GDRIVE` | Reversed |
 
+**Service Account credentials file path:**
+
+| Variable | Notes |
+|----------|-------|
+| `GOOGLE_APPLICATION_CREDENTIALS` | Standard Google form |
+| `GDRIVE_CREDENTIALS` | Drive-specific form |
+
 **OAuth Client credentials (for `gdrive auth login`):**
 
 | Variable | Notes |
 |----------|-------|
 | `GDRIVE_CLIENT_ID` | Primary (canonical) |
-| `GOOGLE_CLIENT_ID` | Standard Google name |
-| `GDRIVE_OAUTH_CLIENT_ID` | OAuth-specific form |
-
-| Variable | Notes |
-|----------|-------|
 | `GDRIVE_CLIENT_SECRET` | Primary (canonical) |
-| `GOOGLE_CLIENT_SECRET` | Standard Google name |
-| `GDRIVE_OAUTH_SECRET` | OAuth-specific form |
+| `GDRIVE_CLIENT_SECRET_FILE` | Path to client_secret.json file |
 
 ---
 
@@ -107,11 +147,19 @@ gdrive info
 ## auth
 
 ### `auth login`
-Open browser for Google OAuth 2.0 flow. Requires `GDRIVE_CLIENT_ID` and `GDRIVE_CLIENT_SECRET`.
+
+Browser OAuth 2.0 flow — opens Google sign-in and saves token with auto-refresh.
+
+Client credentials are auto-resolved (see Authentication section above).
 
 ```bash
+# With env vars
 export GDRIVE_CLIENT_ID=<id>
 export GDRIVE_CLIENT_SECRET=<secret>
+gdrive auth login
+
+# With saved client_secret.json
+gdrive auth set-client-secret /path/to/client_secret.json
 gdrive auth login
 
 # On a remote server / VPS (no browser available)
@@ -121,16 +169,36 @@ gdrive auth login --no-browser
 With `--no-browser`: the CLI prints the OAuth URL. Open it in your local browser, authorize, then copy the full redirect URL from the address bar (it will fail to load — that's expected) and paste it into the terminal.
 
 Flags:
-- `--no-browser` — manual flow for remote/VPS environments (no localhost server needed)
+- `--no-browser` — manual flow for remote/VPS environments
+- `--client-secret-file <path>` — path to client_secret.json (overrides default lookup)
 
 ### `auth set-token <token>`
+
 Save an access token directly (no refresh capability).
 
 ```bash
 gdrive auth set-token ya29.xxx...
 ```
 
+### `auth set-client-secret <path>`
+
+Save the path to a `client_secret.json` file for OAuth login. Download from Google Cloud Console (Desktop application type).
+
+```bash
+gdrive auth set-client-secret /path/to/client_secret.json
+# Then run: gdrive auth login
+```
+
+### `auth set-credentials <path>`
+
+Save a service account JSON key file path for service account authentication.
+
+```bash
+gdrive auth set-credentials /path/to/service-account.json
+```
+
 ### `auth status`
+
 Show current auth state.
 
 ```bash
@@ -138,6 +206,7 @@ gdrive auth status
 ```
 
 ### `auth logout`
+
 Remove saved credentials.
 
 ```bash
@@ -347,7 +416,9 @@ The response includes a new start token for the next poll.
 
 ## Tips
 
-- **Authentication**: run `gdrive auth login` with `GDRIVE_CLIENT_ID` + `GDRIVE_CLIENT_SECRET` for full OAuth with auto-refresh.
+- **Authentication**: use `gdrive auth login` with `GDRIVE_CLIENT_ID` + `GDRIVE_CLIENT_SECRET` for full OAuth with auto-refresh.
+- **client_secret.json**: run `gdrive auth set-client-secret /path/to/client_secret.json` once, then just `gdrive auth login`.
+- **Service account**: use `gdrive auth set-credentials /path/to/sa.json` for automation without user interaction.
 - **Update**: run `gdrive update` to pull the latest version from GitHub.
 - **Output is auto-detected**: JSON when piped, tables in terminal. Use `--json` when parsing output.
 - **Finding IDs**: `gdrive files list --json | jq '.[].id'`
