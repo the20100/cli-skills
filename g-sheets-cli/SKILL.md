@@ -1,6 +1,6 @@
 ---
 name: gsheets
-version: 1.0.0
+version: 1.1.0
 description: Use when the user wants to manage Google Sheets — read/write cell values, list/create/manage spreadsheets and tabs, or automate spreadsheet operations using the gsheets CLI. Trigger on requests like "read my spreadsheet", "write to Sheet1", "list sheets", "append rows", "clear a range", "create a spreadsheet", etc.
 ---
 
@@ -17,12 +17,12 @@ Run commands with the Bash tool. Find the binary by running `which gsheets` or l
 which gsheets
 
 # If not found, clone, build, install, then delete the source folder
-git clone https://github.com/the20100/g-sheets-cli
-cd g-sheets-cli
+git clone https://github.com/the20100/gsheets-cli
+cd gsheets-cli
 go build -o gsheets .
 mv gsheets /usr/local/bin/
 cd ..
-rm -rf g-sheets-cli
+rm -rf gsheets-cli
 
 # If found, check if the last version is installed
 gsheets update
@@ -50,6 +50,30 @@ Credentials are stored in:
 
 To create a service account: https://console.cloud.google.com/iam-admin/serviceaccounts
 (Share the spreadsheet with the service account email to grant access.)
+
+---
+
+## Agent invariants
+
+**These rules must always be followed when using the CLI as an agent:**
+
+1. **Always confirm with the user before executing write/delete commands** (values.update, values.append, values.clear, sheet.delete, sheet.add, spreadsheet.create).
+2. **Use `gsheets schema <command>` to introspect** what a command accepts before calling it — don't guess parameters.
+3. **Never pre-encode spreadsheet IDs or range strings** — pass them as plain strings (e.g. `"Sheet1!A1:C10"`, not `"Sheet1%21A1%3AC10"`).
+4. **Spreadsheet IDs are long alphanumeric strings** from the URL. Never use titles or names as IDs.
+5. **Sheet IDs are numeric integers** (not sheet titles) — get them from `gsheets sheet list <spreadsheet-id>`.
+
+---
+
+## Schema introspection
+
+Use `gsheets schema` to get machine-readable command documentation:
+
+```bash
+gsheets schema                        # all commands as JSON
+gsheets schema spreadsheet.get        # single command schema
+gsheets schema values.update          # see required flags
+```
 
 ---
 
@@ -266,6 +290,6 @@ gsheets values clear SPREADSHEET_ID "Sheet1!A:A"
 - **Sheet IDs**: run `gsheets sheet list SPREADSHEET_ID` — use the numeric `SHEET ID` column
 - **A1 notation**: `Sheet1!A1:C10`, `Sheet1!A:A`, `Sheet1!1:5`, or just `A1:B2` (first sheet)
 - **JSON output**: use `--json` when parsing output — e.g., `gsheets sheet list ID --json | jq '.[].title'`
-- **Finding spreadsheet IDs**: `gsheets spreadsheet get ID --json | jq '.id'`
+- **Schema introspection**: run `gsheets schema` to see all available commands and their parameters as JSON
 - **Env var override**: set `GOOGLE_APPLICATION_CREDENTIALS` to bypass all stored configs
 - **Update**: run `gsheets update` to pull the latest version from GitHub
