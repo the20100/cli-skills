@@ -1,86 +1,66 @@
 ---
 name: slides2pdf
-version: 1.0.0
-description: >
-  Use when the user wants to convert an HTML slide presentation to PDF.
-  Trigger on requests like "convert slides to PDF", "export presentation as PDF",
-  "generate PDF from HTML deck", "make a PDF from my slides", etc.
+version: 1.1.0
+description: Use when the user wants to convert an HTML slide presentation to PDF. Trigger on requests like "convert slides to PDF", "export presentation as PDF", "generate PDF from HTML deck", "make a PDF from my slides", "export my slides", etc.
 ---
 
-# slides2pdf — HTML Slide Presentation to PDF Converter
+# slides2pdf CLI
 
-Converts HTML slide presentations to PDF documents with one page per slide.
-Uses headless Chrome to render the HTML exactly as it appears in a browser.
+The `slides2pdf` CLI converts HTML slide presentations to PDF documents with one page per slide, using headless Chrome.
 
-## Installation
+Run commands with the Bash tool. Find the binary by running `which slides2pdf` or look in the standard PATH. The binary name is `slides2pdf`.
 
-```bash
-git clone https://github.com/the20100/simple-slides2pdf.git /tmp/simple-slides2pdf
-cd /tmp/simple-slides2pdf && go build -o slides2pdf . && sudo mv slides2pdf /usr/local/bin/
-```
-
-Or from local source:
+**If the `slides2pdf` binary is not found**, install it first:
 
 ```bash
-cd /Users/vincentmaurin/Work/AI/AIv2/CLIs/slides2pdf-cli
-go install .
+# Check if available
+which slides2pdf
+
+# If not found, clone, build, install, then delete the source folder
+git clone https://github.com/the20100/simple-slides2pdf.git
+cd simple-slides2pdf
+go build -o slides2pdf .
+mv slides2pdf /usr/local/bin/
+cd ..
+rm -rf simple-slides2pdf
+
+# If found, check if the latest version is installed
+slides2pdf update
 ```
 
-Binary: `slides2pdf`
-Repository: https://github.com/the20100/simple-slides2pdf
+No authentication required. No Chrome installation required — if no browser is found, the tool automatically downloads `chrome-headless-shell` from Google's Chrome for Testing and caches it at `~/.cache/slides2pdf/`. Works out of the box on headless VPS.
 
-## Prerequisites
+---
 
-- Go 1.22+ (for building from source)
-- **Chrome is NOT required** — if no browser is found, the tool automatically downloads `chrome-headless-shell` from Google's Chrome for Testing and caches it at `~/.cache/slides2pdf/`. Works out of the box on headless VPS.
+## Global flags (apply to every command)
 
-## Agent Invariants
+| Flag       | Description                                |
+|------------|--------------------------------------------|
+| `--json`   | Force JSON output                          |
+| `--pretty` | Force pretty-printed JSON (implies --json) |
+| `--dry-run`| Validate inputs without executing          |
 
-1. **Always use `--dry-run` first** to validate inputs before converting
-2. **Always confirm with user** before overwriting existing PDF files
-3. **Use `schema convert`** to introspect command flags before calling
-4. **Input can be a directory** — the tool will auto-detect `index.html` inside
+---
 
-## Schema Introspection
+## convert
 
-```bash
-slides2pdf schema              # all commands
-slides2pdf schema convert      # convert command details
-```
+Convert an HTML slide presentation to PDF with one page per slide.
 
-## Commands
-
-### convert
-
-Convert an HTML slide presentation to PDF.
+Input can be an HTML file or a directory containing `index.html`.
 
 ```bash
 slides2pdf convert <input> [flags]
 ```
 
-**Arguments:**
-
-| Arg     | Required | Description                                           |
-|---------|----------|-------------------------------------------------------|
-| `input` | yes      | Path to HTML file or directory containing index.html  |
-
 **Flags:**
 
-| Flag               | Type   | Default  | Description                                      |
-|--------------------|--------|----------|--------------------------------------------------|
-| `-o, --output`     | string | auto     | Output PDF path (default: input name + .pdf)     |
-| `--width`          | int    | 1920     | Viewport width in pixels                         |
-| `--height`         | int    | 1080     | Viewport height in pixels                        |
-| `--slide-selector` | string | `.slide` | CSS selector for individual slides               |
-| `--deck-selector`  | string | `.deck`  | CSS selector for the slide deck container        |
-| `--dry-run`        | bool   | false    | Validate inputs without converting               |
-
-**Global flags:**
-
-| Flag       | Type | Description                               |
-|------------|------|-------------------------------------------|
-| `--json`   | bool | Force JSON output                         |
-| `--pretty` | bool | Force pretty-printed JSON (implies --json)|
+| Flag               | Type   | Default  | Description                                |
+|--------------------|--------|----------|--------------------------------------------|
+| `-o, --output`     | string | auto     | Output PDF path (default: input name + .pdf) |
+| `--width`          | int    | 1920     | Viewport width in pixels                   |
+| `--height`         | int    | 1080     | Viewport height in pixels                  |
+| `--slide-selector` | string | `.slide` | CSS selector for individual slides         |
+| `--deck-selector`  | string | `.deck`  | CSS selector for the slide deck container  |
 
 **Examples:**
 
@@ -101,39 +81,43 @@ slides2pdf convert deck.html --slide-selector "section.slide" --deck-selector ".
 slides2pdf convert presentation/ --dry-run
 ```
 
-### info
+---
 
-Show tool info (binary path, OS, environment).
+## info
+
+Show binary location and OS/arch.
 
 ```bash
 slides2pdf info
 ```
 
-### update
+---
 
-Self-update from GitHub source.
+## update
+
+Self-update from GitHub source. Clones latest, rebuilds, and atomically replaces the current binary.
 
 ```bash
 slides2pdf update
 ```
 
-## How It Works
+---
 
-1. Opens the HTML file in headless Chrome at the specified viewport size
-2. Injects CSS to override the horizontal scroll layout to vertical flow with page breaks
-3. Uses Chrome's `Page.printToPDF` API with paper dimensions matching the viewport
-4. Writes the PDF to disk
+## schema
 
-## Supported HTML Patterns
+Dump machine-readable command schemas as JSON for agent introspection.
 
-The tool works with any HTML presentation that uses:
-- A container element (default: `.deck`) holding slide elements
-- Individual slide elements (default: `.slide`) sized to viewport
+```bash
+slides2pdf schema              # all commands
+slides2pdf schema convert      # one command
+```
 
-The CSS selectors are configurable via `--slide-selector` and `--deck-selector` flags.
+---
 
-## Output
+## Tips
 
-- **Terminal (TTY):** Human-readable status message
-- **Piped (non-TTY):** JSON with `status`, `input`, `output` fields
-- **`--json` flag:** Forces JSON output regardless of context
+- **Input flexibility**: pass a directory and the tool auto-detects `index.html` inside.
+- **Output is auto-detected**: JSON when piped (for agent use), human-readable text in terminal.
+- **No Chrome needed**: on headless VPS, Chrome headless shell is auto-downloaded on first run and cached for subsequent runs.
+- **Custom selectors**: if the HTML uses non-standard class names, override with `--slide-selector` and `--deck-selector`.
+- **Default output**: when `-o` is omitted, the PDF is written next to the input file with the same base name.
