@@ -15,12 +15,19 @@ Uses headless Chrome to render the HTML exactly as it appears in a browser.
 ## Installation
 
 ```bash
+git clone https://github.com/the20100/simple-slides2pdf.git /tmp/simple-slides2pdf
+cd /tmp/simple-slides2pdf && go build -o slides2pdf . && sudo mv slides2pdf /usr/local/bin/
+```
+
+Or from local source:
+
+```bash
 cd /Users/vincentmaurin/Work/AI/AIv2/CLIs/slides2pdf-cli
 go install .
 ```
 
 Binary: `slides2pdf`
-Source: `/Users/vincentmaurin/Work/AI/AIv2/CLIs/slides2pdf-cli`
+Repository: https://github.com/the20100/simple-slides2pdf
 
 ## Prerequisites
 
