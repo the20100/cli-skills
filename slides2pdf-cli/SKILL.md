@@ -31,8 +31,8 @@ Repository: https://github.com/the20100/simple-slides2pdf
 
 ## Prerequisites
 
-- Google Chrome or Chromium installed
 - Go 1.22+ (for building from source)
+- **Chrome is NOT required** — if no browser is found, the tool automatically downloads `chrome-headless-shell` from Google's Chrome for Testing and caches it at `~/.cache/slides2pdf/`. Works out of the box on headless VPS.
 
 ## Agent Invariants
 
