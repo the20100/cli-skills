@@ -323,6 +323,45 @@ Get details of a specific image (ID, filename, dimensions, URL).
 typeform image get abc123
 ```
 
+### `image upload <url-or-file>`
+Upload an image from a public URL or local file path. Returns the Typeform-hosted URL (`src`) to use in form attachments (welcome screens, fields, thank-you screens) via the `attachment.href` property.
+
+Supported formats: JPEG, PNG, GIF, BMP. **WebP is NOT supported.**
+
+- `--file-name <name>` — override the stored file name
+
+```bash
+# Upload from URL
+typeform image upload https://example.com/logo.png --pretty
+
+# Upload from URL with custom name
+typeform image upload https://cdn.example.com/hero.png --file-name "brand-hero.png"
+
+# Upload local file
+typeform image upload ./photo.jpg --pretty
+```
+
+**Using uploaded images in forms:**
+
+External image URLs cannot be used directly in Typeform forms. You must first upload them, then use the returned `src` URL in your form payload:
+
+```bash
+# 1. Upload the image
+typeform image upload https://example.com/logo.png --pretty
+# Returns: { "src": "https://images.typeform.com/images/abc123", ... }
+
+# 2. Use the Typeform-hosted URL in your form
+typeform form create "My Form" --workspace-id ws123 --params '{
+  "welcome_screens": [{
+    "title": "Welcome",
+    "attachment": {
+      "type": "image",
+      "href": "https://images.typeform.com/images/abc123"
+    }
+  }]
+}'
+```
+
 ### `image delete <image-id>`
 Delete an image. **Blocked in secure mode.**
 
