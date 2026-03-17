@@ -164,12 +164,15 @@ Edit existing images with **nano-banana-2/edit** (image-to-image transformation)
 
 Accepts image sources in two ways — both flags are repeatable and combinable:
 - `--image <url>` — a remote image URL
-- `--file <path>` — a local file (absolute path); uploaded to fal.ai storage automatically before the request
+- `--file <path>` — a local file (absolute path); encoded as base64 data URI by default
+
+Local files are sent as base64 data URIs inline in the request (no fal.ai upload needed).
+For large files, use `--r2-bucket` + `--r2-domain` to upload to Cloudflare R2 first and pass the public URL instead.
 
 ```bash
 fal edit "<prompt>" --image <url> [flags]
 fal edit "<prompt>" --file /absolute/path/to/image.jpg [flags]
-fal edit "<prompt>" --image <url> --file /path/to/other.jpg [flags]
+fal edit "<prompt>" --file /path/to/image.jpg --r2-bucket my-pub --r2-domain pub.example.com [flags]
 ```
 
 ### Flags
@@ -177,7 +180,9 @@ fal edit "<prompt>" --image <url> --file /path/to/other.jpg [flags]
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--image <url>` | *(required if no --file)* | Remote image URL to edit (repeatable) |
-| `--file <path>` | *(required if no --image)* | Local image path to upload and edit (absolute path, repeatable) |
+| `--file <path>` | *(required if no --image)* | Local image path (absolute path, repeatable). Encoded as base64 by default |
+| `--r2-bucket <name>` | | Upload files to this R2 bucket instead of base64 (requires `r2` CLI) |
+| `--r2-domain <domain>` | | Public domain for R2 bucket (e.g. `pub.example.com`); required with `--r2-bucket` |
 | `--aspect <ratio>` | `auto` | `21:9`, `16:9`, `3:2`, `4:3`, `5:4`, `1:1`, `4:5`, `3:4`, `2:3`, `9:16`, `auto` |
 | `--resolution <res>` | `1K` | `1K`, `2K`, `4K` (4K billed at 2×) |
 | `--num <n>` | `1` | Number of output images (1–4) |
@@ -194,8 +199,10 @@ fal edit "<prompt>" --image <url> --file /path/to/other.jpg [flags]
 ```bash
 # Remote URL
 fal edit "make it night time" --image https://example.com/photo.jpg --queue --json
-# Local file (uploaded automatically)
+# Local file (base64 — default)
 fal edit "make it night time" --file /Users/me/photos/city.jpg --queue --json
+# Local file via R2 upload (better for large files)
+fal edit "make it night time" --file /Users/me/photos/city.jpg --r2-bucket my-pub --r2-domain pub.example.com --queue --json
 # Mix URL + local file
 fal edit "composite both" --image https://img1.jpg --file /path/to/img2.jpg --queue --json
 # Standard options
@@ -313,7 +320,7 @@ Pricing fields: `endpoint_id`, `unit_price`, `unit` (image/video/GPU), `currency
 - **Authentication**: use `fal auth set-key` once, or set `FAL_KEY` env var. `FAL_KEY` always takes priority over the config file.
 - **Polling with logs**: add `--logs` to any queue command to stream model stdout/stderr as it runs.
 - **nano-banana-2 shortcuts**: `fal generate` = text-to-image, `fal edit` = image-to-image. Both support all the same quality/aspect/format flags.
-- **Local files with edit**: use `--file /absolute/path/image.jpg` to upload a local file automatically. Use `--image <url>` for remote URLs. Both are repeatable and combinable in the same command.
+- **Local files with edit**: use `--file /absolute/path/image.jpg` to pass a local file as base64. Use `--image <url>` for remote URLs. Both are repeatable and combinable. For large files, add `--r2-bucket <bucket> --r2-domain <domain>` to upload to R2 instead of base64.
 - **Request IDs**: when using `--queue`, the request ID is printed to stderr — save it with `fal queue status` / `fal queue result` if you need to check back later.
 - **Seed for reproducibility**: use `--seed <n>` with generate/edit to reproduce the exact same image from the same prompt.
 - **4K billing**: resolution `4K` is charged at 2× the base rate per image.
