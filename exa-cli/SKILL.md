@@ -1,6 +1,6 @@
 ---
 name: exa
-version: 1.0.0
+version: 1.1.0
 description: Use when the user wants to search the web, find similar pages, retrieve page content, get AI-powered answers with citations, or run deep research tasks using the Exa AI API. Trigger on requests like "search for...", "find pages similar to...", "get the content of this URL", "answer my question using Exa", "research this topic", etc.
 ---
 
@@ -28,7 +28,14 @@ rm -rf exa-cli
 exa update
 ```
 
-Set the API key via the `EXA_API_KEY` environment variable (preferred) or pass `--api-key <key>` to every command.
+**Authentication:**
+Set the API key once with `exa auth set-key <key>` or via the `EXA_API_KEY` env var.
+Credentials are stored in:
+- macOS: `~/Library/Application Support/exa/config.json`
+- Linux: `~/.config/exa/config.json`
+- Windows: `%AppData%\exa\config.json`
+
+Get your API key at: https://dashboard.exa.ai/api-keys
 
 ## Environment variables
 
@@ -61,6 +68,31 @@ The following env var names are accepted for the API key (first non-empty wins):
 | `--api-key <key>` | Exa API key. Can also set `EXA_API_KEY` env var. |
 | `--base-url <url>` | Override the API base URL (default: `https://api.exa.ai`) |
 | `--json` | Output raw JSON instead of formatted text |
+
+---
+
+## auth
+
+Manage Exa authentication.
+
+```bash
+# Save your API key
+exa auth set-key your_api_key_here
+
+# Check current auth status
+exa auth status
+
+# Remove saved API key
+exa auth logout
+```
+
+### Subcommands
+
+| Subcommand | Description |
+|------------|-------------|
+| `set-key <api-key>` | Save an Exa API key to the config file |
+| `status` | Show current authentication status |
+| `logout` | Remove the saved API key from the config file |
 
 ---
 
@@ -242,7 +274,7 @@ exa research "Top 10 Go web frameworks with pros and cons" --json
 
 ## Tips
 
-- **API key**: set `EXA_API_KEY=<your-key>` in the environment to avoid passing `--api-key` every time.
+- **API key**: set with `exa auth set-key` or via `EXA_API_KEY` env var to avoid passing `--api-key` every time.
 - **Content enrichment**: combine `--text`, `--summary`, and `--highlights` freely; each adds a separate field to results.
 - **Live crawl**: use `--livecrawl always` when you need the absolute latest content (bypasses cache). Use `--livecrawl fallback` to use cache when available (faster + cheaper).
 - **Search types**: `neural` is best for semantic/conceptual queries; `fast` for quick keyword lookup; `deep` for thorough coverage; `auto` lets Exa decide.

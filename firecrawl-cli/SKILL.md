@@ -1,10 +1,12 @@
 ---
 name: firecrawl
-version: 1.0.0
+version: 1.1.0
 description: Use when the user wants to scrape a webpage, crawl a website, search the web, map URLs, or extract structured data (JSON schema) using Firecrawl. Trigger on requests like "scrape this URL", "crawl this site", "extract data from this page", "get all links on this site", "search for X with Firecrawl", "extract structured JSON from this page", etc.
 ---
 
 # Firecrawl CLI
+
+The `firecrawl` CLI interacts with the [Firecrawl](https://www.firecrawl.dev) API — a web scraping, crawling, and extraction platform.
 
 Run commands with the Bash tool. Find the binary by running `which firecrawl` or look in the standard PATH. The binary name is `firecrawl`.
 
@@ -26,7 +28,14 @@ rm -rf firecrawl-cli
 firecrawl update
 ```
 
-The API key is read from the `FIRECRAWL_API_KEY` environment variable, or passed via `--api-key`.
+**Authentication:**
+Set the API key once with `firecrawl auth set-key <key>` or via the `FIRECRAWL_API_KEY` env var.
+Credentials are stored in:
+- macOS: `~/Library/Application Support/firecrawl/config.json`
+- Linux: `~/.config/firecrawl/config.json`
+- Windows: `%AppData%\firecrawl\config.json`
+
+Get your API key at: https://www.firecrawl.dev/app/api-keys
 
 For self-hosted instances, set `FIRECRAWL_API_URL` or use `--api-url`.
 
@@ -61,6 +70,31 @@ The following env var names are accepted for the API key (first non-empty wins):
 | `--api-key <key>` | Firecrawl API key (or set `FIRECRAWL_API_KEY` env var) |
 | `--api-url <url>` | Override API base URL (or set `FIRECRAWL_API_URL`) |
 | `--json` | Output raw JSON response |
+
+---
+
+## auth
+
+Manage Firecrawl authentication.
+
+```bash
+# Save your API key
+firecrawl auth set-key fc-your_api_key_here
+
+# Check current auth status
+firecrawl auth status
+
+# Remove saved API key
+firecrawl auth logout
+```
+
+### Subcommands
+
+| Subcommand | Description |
+|------------|-------------|
+| `set-key <api-key>` | Save a Firecrawl API key to the config file |
+| `status` | Show current authentication status |
+| `logout` | Remove the saved API key from the config file |
 
 ---
 
@@ -358,7 +392,7 @@ firecrawl credit-usage --json
 
 ## Tips
 
-- **API key**: set `FIRECRAWL_API_KEY` in the environment to avoid passing `--api-key` every time.
+- **API key**: set with `firecrawl auth set-key` or via `FIRECRAWL_API_KEY` env var to avoid passing `--api-key` every time.
 - **Self-hosted**: set `FIRECRAWL_API_URL` to point to your own Firecrawl instance (auth check is skipped).
 - **Structured extraction**: use `--schema` or `--schema-file` on `scrape` or `agent` for JSON output with a defined shape. The CLI handles the `{"type":"json","schema":{...}}` wrapping automatically.
 - **PDF support**: add `--parser pdf` to `scrape` for PDF documents.
