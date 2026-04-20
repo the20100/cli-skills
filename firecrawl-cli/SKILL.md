@@ -110,7 +110,7 @@ firecrawl scrape <url> [flags]
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
-| `--format <formats>` | `-f` | `markdown` | Comma-separated: `markdown`, `html`, `rawHtml`, `links`, `screenshot`, `json` |
+| `--format <formats>` | `-f` | `markdown` | Comma-separated: `markdown`, `html`, `rawHtml`, `links`, `screenshot`, `branding`, `json` |
 | `--schema <json>` | | | Inline JSON schema for structured extraction |
 | `--schema-file <path>` | | | Path to a JSON schema file |
 | `--only-main-content` | | | Strip navigation, footers, sidebars |
@@ -139,6 +139,9 @@ firecrawl scrape https://example.com
 
 # Multiple formats
 firecrawl scrape https://example.com --format markdown,html,links
+
+# Branding extraction (colors, logo, fonts)
+firecrawl scrape https://example.com --format branding,screenshot,links
 
 # Structured JSON extraction with inline schema
 firecrawl scrape https://example.com \
