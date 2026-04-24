@@ -1,7 +1,7 @@
 ---
 name: fal-ai
-version: 1.4.0
-description: Use when the user wants to generate or edit images using fal.ai models — including nano-banana-2, Flux, or any other fal.ai model endpoint. Trigger on requests like "generate an image with fal", "run a fal model", "edit this image with fal", "check my fal queue", "list fal models", "what does fal cost", "submit to fal queue", etc.
+version: 1.5.0
+description: Use when the user wants to generate or edit images using fal.ai models — including GPT Image 2, nano-banana-2, Flux, or any other fal.ai model endpoint. Trigger on requests like "generate an image with fal", "run a fal model", "edit this image with fal", "check my fal queue", "list fal models", "what does fal cost", "submit to fal queue", etc.
 ---
 
 # fal.ai CLI
@@ -122,12 +122,116 @@ fal auth logout
 
 ---
 
-## generate *(shortcut for fal-ai/nano-banana-2)*
+## generate *(shortcut for openai/gpt-image-2)*
+
+Generate images with **GPT Image 2** — high-quality text-to-image model.
+
+Default: `--quality medium --resolution 2K`
+
+### Quality/resolution recommendations
+
+| Quality | Recommended resolution | Notes |
+|---------|----------------------|-------|
+| `low` | **4K** | Higher resolution compensates for lower quality |
+| `medium` | **2K or 4K** | Both work well; 2K is the default |
+| `high` | any | Use 2K or 4K depending on budget |
+
+```bash
+fal generate "<prompt>" [flags]
+```
+
+### Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--quality <q>` | `medium` | Quality: `low`, `medium`, `high` (affects cost significantly) |
+| `--resolution <res>` | `2K` | `2K` (2048px), `4K` (3840px) |
+| `--num <n>` | `1` | Number of images (1–4) |
+| `--format <fmt>` | `png` | `jpeg`, `png`, `webp` |
+| `--queue` | `false` | Submit via queue instead of sync |
+| `--logs` | `false` | Show model logs while polling (implies --queue) |
+
+### Examples
+
+```bash
+fal generate "a cat wearing a hat" --queue --json
+fal generate "golden gate bridge at sunset" --quality high --queue --json
+fal generate "portrait of a woman" --resolution 4K --num 2 --queue --json
+fal generate "futuristic city" --format webp --queue --json
+fal generate "detailed artwork" --quality low --resolution 4K --queue --json
+fal generate "product photo" --quality medium --resolution 2K --queue --json
+```
+
+---
+
+## edit *(shortcut for openai/gpt-image-2/edit)*
+
+Edit existing images with **GPT Image 2 edit** — high-quality image editing model.
+
+Default: `--quality medium --resolution 2K`
+
+Accepts image sources in two ways — both flags are repeatable and combinable:
+- `--image <url>` — a remote image URL
+- `--file <path>` — a local file (absolute path); encoded as base64 data URI by default
+
+Local files are sent as base64 data URIs inline in the request (no fal.ai upload needed).
+For large files, use `--r2-bucket` + `--r2-domain` to upload to Cloudflare R2 first and pass the public URL instead.
+
+### Quality/resolution recommendations
+
+| Quality | Recommended resolution | Notes |
+|---------|----------------------|-------|
+| `low` | **4K** | Higher resolution compensates for lower quality |
+| `medium` | **2K or 4K** | Both work well; 2K is the default |
+| `high` | any | Use 2K or 4K depending on budget |
+
+```bash
+fal edit "<prompt>" --image <url> [flags]
+fal edit "<prompt>" --file /absolute/path/to/image.jpg [flags]
+fal edit "<prompt>" --file /path/to/image.jpg --r2-bucket my-pub --r2-domain pub.example.com [flags]
+```
+
+### Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--image <url>` | *(required if no --file)* | Remote image URL to edit (repeatable) |
+| `--file <path>` | *(required if no --image)* | Local image path (absolute path, repeatable). Encoded as base64 by default |
+| `--mask <url>` | | Mask image URL (marks areas to edit) |
+| `--r2-bucket <name>` | | Upload files to this R2 bucket instead of base64 (requires `r2` CLI) |
+| `--r2-domain <domain>` | | Public domain for R2 bucket (e.g. `pub.example.com`); required with `--r2-bucket` |
+| `--quality <q>` | `medium` | Quality: `low`, `medium`, `high` (affects cost significantly) |
+| `--resolution <res>` | `2K` | `2K` (2048px), `4K` (3840px) |
+| `--num <n>` | `1` | Number of output images (1–4) |
+| `--format <fmt>` | `png` | `jpeg`, `png`, `webp` |
+| `--queue` | `false` | Submit via queue instead of sync |
+| `--logs` | `false` | Show model logs while polling (implies --queue) |
+
+### Examples
+
+```bash
+# Remote URL
+fal edit "make it night time" --image https://example.com/photo.jpg --queue --json
+# Local file (base64 — default)
+fal edit "make it night time" --file /Users/me/photos/city.jpg --queue --json
+# Local file via R2 upload (better for large files)
+fal edit "make it night time" --file /Users/me/photos/city.jpg --r2-bucket my-pub --r2-domain pub.example.com --queue --json
+# With mask
+fal edit "change sky to sunset" --image https://example.com/photo.jpg --mask https://example.com/mask.png --queue --json
+# Higher resolution for quality low
+fal edit "detailed retouch" --quality low --resolution 4K --file /path/to/photo.jpg --queue --json
+# Standard with medium quality
+fal edit "add heavy snowfall" --image https://example.com/city.jpg --quality medium --resolution 2K --queue --json
+```
+
+---
+
+## generate-banana *(shortcut for fal-ai/nano-banana-2)*
 
 Generate images with **nano-banana-2** (state-of-the-art text-to-image model).
 
 ```bash
-fal generate "<prompt>" [flags]
+fal generate-banana "<prompt>" [flags]
 ```
 
 ### Flags
@@ -148,17 +252,17 @@ fal generate "<prompt>" [flags]
 ### Examples
 
 ```bash
-fal generate "a cat wearing a hat" --queue --json
-fal generate "golden gate bridge at sunset" --aspect 16:9 --queue --json
-fal generate "portrait of a woman" --resolution 2K --num 2 --queue --json
-fal generate "futuristic city" --format webp --seed 42 --queue --json
-fal generate "latest AI news illustration" --web-search --queue --json
-fal generate "very detailed artwork" --resolution 4K --queue --json
+fal generate-banana "a cat wearing a hat" --queue --json
+fal generate-banana "golden gate bridge at sunset" --aspect 16:9 --queue --json
+fal generate-banana "portrait of a woman" --resolution 2K --num 2 --queue --json
+fal generate-banana "futuristic city" --format webp --seed 42 --queue --json
+fal generate-banana "latest AI news illustration" --web-search --queue --json
+fal generate-banana "very detailed artwork" --resolution 4K --queue --json
 ```
 
 ---
 
-## edit *(shortcut for fal-ai/nano-banana-2/edit)*
+## edit-banana *(shortcut for fal-ai/nano-banana-2/edit)*
 
 Edit existing images with **nano-banana-2/edit** (image-to-image transformation).
 
@@ -170,9 +274,9 @@ Local files are sent as base64 data URIs inline in the request (no fal.ai upload
 For large files, use `--r2-bucket` + `--r2-domain` to upload to Cloudflare R2 first and pass the public URL instead.
 
 ```bash
-fal edit "<prompt>" --image <url> [flags]
-fal edit "<prompt>" --file /absolute/path/to/image.jpg [flags]
-fal edit "<prompt>" --file /path/to/image.jpg --r2-bucket my-pub --r2-domain pub.example.com [flags]
+fal edit-banana "<prompt>" --image <url> [flags]
+fal edit-banana "<prompt>" --file /absolute/path/to/image.jpg [flags]
+fal edit-banana "<prompt>" --file /path/to/image.jpg --r2-bucket my-pub --r2-domain pub.example.com [flags]
 ```
 
 ### Flags
@@ -198,17 +302,17 @@ fal edit "<prompt>" --file /path/to/image.jpg --r2-bucket my-pub --r2-domain pub
 
 ```bash
 # Remote URL
-fal edit "make it night time" --image https://example.com/photo.jpg --queue --json
+fal edit-banana "make it night time" --image https://example.com/photo.jpg --queue --json
 # Local file (base64 — default)
-fal edit "make it night time" --file /Users/me/photos/city.jpg --queue --json
+fal edit-banana "make it night time" --file /Users/me/photos/city.jpg --queue --json
 # Local file via R2 upload (better for large files)
-fal edit "make it night time" --file /Users/me/photos/city.jpg --r2-bucket my-pub --r2-domain pub.example.com --queue --json
+fal edit-banana "make it night time" --file /Users/me/photos/city.jpg --r2-bucket my-pub --r2-domain pub.example.com --queue --json
 # Mix URL + local file
-fal edit "composite both" --image https://img1.jpg --file /path/to/img2.jpg --queue --json
+fal edit-banana "composite both" --image https://img1.jpg --file /path/to/img2.jpg --queue --json
 # Standard options
-fal edit "add heavy snowfall" --image https://example.com/city.jpg --aspect 16:9 --queue --json
-fal edit "remove background" --file /path/to/portrait.jpg --format png --queue --json
-fal edit "man driving down the california coastline" --file /path/to/photo.jpg --resolution 2K --queue --json
+fal edit-banana "add heavy snowfall" --image https://example.com/city.jpg --aspect 16:9 --queue --json
+fal edit-banana "remove background" --file /path/to/portrait.jpg --format png --queue --json
+fal edit-banana "man driving down the california coastline" --file /path/to/photo.jpg --resolution 2K --queue --json
 ```
 
 ---
@@ -233,6 +337,8 @@ fal run <model-id> --input '<json>' [--queue] [--logs]
 
 ```bash
 # Always use --queue --json
+fal run openai/gpt-image-2 --input '{"prompt":"a cat","quality":"medium","image_size":{"width":2048,"height":2048}}' --queue --json
+fal run openai/gpt-image-2/edit --input '{"prompt":"make it night","image_urls":["https://..."],"quality":"medium"}' --queue --json
 fal run fal-ai/nano-banana-2 --input '{"prompt":"a cat"}' --queue --json
 fal run fal-ai/flux/dev --input '{"prompt":"a cat","image_size":"landscape_4_3"}' --queue --json
 fal run fal-ai/flux/schnell --input '{"prompt":"a cat"}' --queue --json
@@ -252,22 +358,22 @@ Check the current status of a queued request.
 - `--logs` — include model logs in the output
 
 ```bash
-fal queue status fal-ai/flux/dev abc123
-fal queue status fal-ai/flux/dev abc123 --logs
+fal queue status openai/gpt-image-2 abc123
+fal queue status openai/gpt-image-2 abc123 --logs
 ```
 
 ### `queue result <model-id> <request-id>`
 Retrieve the result of a completed request.
 
 ```bash
-fal queue result fal-ai/flux/dev abc123
+fal queue result openai/gpt-image-2 abc123
 ```
 
 ### `queue cancel <model-id> <request-id>`
 Cancel a request that is still in queue (`IN_QUEUE` status only).
 
 ```bash
-fal queue cancel fal-ai/flux/dev abc123
+fal queue cancel openai/gpt-image-2 abc123
 ```
 
 ### `queue poll <model-id> <request-id>`
@@ -276,8 +382,8 @@ Poll until the request completes, then print the result.
 - `--logs` — show model logs while polling
 
 ```bash
-fal queue poll fal-ai/flux/dev abc123
-fal queue poll fal-ai/flux/dev abc123 --logs
+fal queue poll openai/gpt-image-2 abc123
+fal queue poll openai/gpt-image-2 abc123 --logs
 ```
 
 ---
@@ -304,9 +410,10 @@ fal models list --category image-to-video --limit 10
 Show pricing for one or more model endpoints.
 
 ```bash
+fal models pricing openai/gpt-image-2
+fal models pricing openai/gpt-image-2 openai/gpt-image-2/edit
 fal models pricing fal-ai/nano-banana-2
 fal models pricing fal-ai/flux/dev fal-ai/flux/schnell
-fal models pricing fal-ai/nano-banana-2 fal-ai/nano-banana-2/edit
 ```
 
 Pricing fields: `endpoint_id`, `unit_price`, `unit` (image/video/GPU), `currency`.
@@ -315,12 +422,15 @@ Pricing fields: `endpoint_id`, `unit_price`, `unit` (image/video/GPU), `currency
 
 ## Tips
 
-- **Always use `--queue --json`**: use these two flags on every `generate`, `edit`, and `run` command. `--queue` avoids synchronous HTTP connections that can time out during long generations; `--json` ensures structured, reliably parseable output regardless of terminal detection.
+- **Always use `--queue --json`**: use these two flags on every `generate`, `edit`, `generate-banana`, `edit-banana`, and `run` command. `--queue` avoids synchronous HTTP connections that can time out during long generations; `--json` ensures structured, reliably parseable output regardless of terminal detection.
 - **Extract image URLs**: `fal generate "a cat" --queue --json | jq -r '.images[0].url'`
 - **Authentication**: use `fal auth set-key` once, or set `FAL_KEY` env var. `FAL_KEY` always takes priority over the config file.
 - **Polling with logs**: add `--logs` to any queue command to stream model stdout/stderr as it runs.
-- **nano-banana-2 shortcuts**: `fal generate` = text-to-image, `fal edit` = image-to-image. Both support all the same quality/aspect/format flags.
-- **Local files with edit**: use `--file /absolute/path/image.jpg` to pass a local file as base64. Use `--image <url>` for remote URLs. Both are repeatable and combinable. For large files, add `--r2-bucket <bucket> --r2-domain <domain>` to upload to R2 instead of base64.
+- **GPT Image 2 shortcuts**: `fal generate` = text-to-image, `fal edit` = image-to-image. Default quality: `medium`, default resolution: `2K`.
+- **GPT Image 2 quality guidance**: `quality low` → use `--resolution 4K` for best results. `quality medium` → `2K` or `4K` both work well. Quality significantly affects cost.
+- **nano-banana-2 shortcuts**: `fal generate-banana` = text-to-image, `fal edit-banana` = image-to-image. Both support aspect ratio, safety tolerance, seed, and web search flags.
+- **Local files with edit/edit-banana**: use `--file /absolute/path/image.jpg` to pass a local file as base64. Use `--image <url>` for remote URLs. Both are repeatable and combinable. For large files, add `--r2-bucket <bucket> --r2-domain <domain>` to upload to R2 instead of base64.
+- **Mask support**: `fal edit` (GPT Image 2) accepts `--mask <url>` to specify which areas of the image to edit.
 - **Request IDs**: when using `--queue`, the request ID is printed to stderr — save it with `fal queue status` / `fal queue result` if you need to check back later.
-- **Seed for reproducibility**: use `--seed <n>` with generate/edit to reproduce the exact same image from the same prompt.
-- **4K billing**: resolution `4K` is charged at 2× the base rate per image.
+- **Seed for reproducibility**: use `--seed <n>` with `generate-banana`/`edit-banana` to reproduce the exact same image from the same prompt.
+- **4K billing on nano-banana-2**: resolution `4K` is charged at 2× the base rate per image.
